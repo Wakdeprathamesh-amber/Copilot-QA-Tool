@@ -1,0 +1,170 @@
+{
+  "66fa69143932cb0a392e9d7f": [
+    {
+      "id": "msg-1",
+      "conversationId": "66fa69143932cb0a392e9d7f",
+      "sender": "user",
+      "content": "Hello, I'm looking for accommodation",
+      "timestamp": "2024-09-30T09:02:15Z",
+      "messageType": "text",
+      "processingLatency": null,
+      "langsmithTraceId": null
+    },
+    {
+      "id": "msg-2",
+      "conversationId": "66fa69143932cb0a392e9d7f",
+      "sender": "ai",
+      "content": "Hi! I'd be happy to help you find accommodation. What city are you looking for?",
+      "timestamp": "2024-09-30T09:02:18Z",
+      "messageType": "text",
+      "processingLatency": 1200,
+      "langsmithTraceId": "trace-abc123"
+    }
+  ],
+  "6644714bb95bab463267a561": [
+    {
+      "id": "msg-3",
+      "conversationId": "6644714bb95bab463267a561",
+      "sender": "user",
+      "content": "I want to be sure that if I pay the studio will be mine",
+      "timestamp": "2024-01-23T14:40:43Z",
+      "messageType": "text",
+      "processingLatency": null,
+      "langsmithTraceId": null
+    },
+    {
+      "id": "msg-4",
+      "conversationId": "6644714bb95bab463267a561",
+      "sender": "ai",
+      "content": "Yes, absolutely! Once you complete the payment, the studio will be reserved for you. Would you like me to guide you through the booking process?",
+      "timestamp": "2024-01-23T14:40:50Z",
+      "messageType": "text",
+      "processingLatency": 2100,
+      "langsmithTraceId": "trace-xyz789"
+    },
+    {
+      "id": "msg-5",
+      "conversationId": "6644714bb95bab463267a561",
+      "sender": "user",
+      "content": "Perfect, thank you!",
+      "timestamp": "2024-01-23T14:41:00Z",
+      "messageType": "text",
+      "processingLatency": null,
+      "langsmithTraceId": null
+    }
+  ],
+  "678f645dd6deeaf2235814d7": [
+    {
+      "id": "msg-6",
+      "conversationId": "678f645dd6deeaf2235814d7",
+      "sender": "user",
+      "content": "I'm looking for a studio in London",
+      "timestamp": "2025-01-21T09:09:10Z",
+      "messageType": "text",
+      "processingLatency": null,
+      "langsmithTraceId": null
+    },
+    {
+      "id": "msg-7",
+      "conversationId": "678f645dd6deeaf2235814d7",
+      "sender": "ai",
+      "content": "Great! I can help you find a studio in London. What's your preferred move-in date?",
+      "timestamp": "2025-01-21T09:09:15Z",
+      "messageType": "text",
+      "processingLatency": 1500,
+      "langsmithTraceId": "trace-studio-london-1"
+    },
+    {
+      "id": "msg-8",
+      "conversationId": "678f645dd6deeaf2235814d7",
+      "sender": "user",
+      "content": "Moving in this February",
+      "timestamp": "2025-01-21T09:09:45Z",
+      "messageType": "text",
+      "processingLatency": null,
+      "langsmithTraceId": null
+    },
+    {
+      "id": "msg-9",
+      "conversationId": "678f645dd6deeaf2235814d7",
+      "sender": "ai",
+      "content": "Perfect! I found several studio options in London available for February move-in. Here are some great options:\n\n1. iQ East Court - Bronze Studio from £169/week\n2. Collegiate Dashwood Studios - Standard Studio from £179/week\n\nWould you like more details about any of these?",
+      "timestamp": "2025-01-21T09:10:00Z",
+      "messageType": "text",
+      "processingLatency": 3200,
+      "langsmithTraceId": "trace-studio-london-2"
+    },
+    {
+      "id": "msg-10",
+      "conversationId": "678f645dd6deeaf2235814d7",
+      "sender": "user",
+      "content": "Need a studio",
+      "timestamp": "2025-01-21T09:10:30Z",
+      "messageType": "text",
+      "processingLatency": null,
+      "langsmithTraceId": null
+    },
+    {
+      "id": "msg-11",
+      "conversationId": "678f645dd6deeaf2235814d7",
+      "sender": "ai",
+      "content": "I understand you need a studio. The options I shared are all studios. Would you like me to show you more studio options or do you have questions about the ones I mentioned?",
+      "timestamp": "2025-01-21T09:10:35Z",
+      "messageType": "text",
+      "processingLatency": 1800,
+      "langsmithTraceId": "trace-studio-london-3"
+    },
+    {
+      "id": "msg-12",
+      "conversationId": "678f645dd6deeaf2235814d7",
+      "sender": "ai",
+      "content": "If you need more information or have other preferences, feel free to let me know!",
+      "timestamp": "2025-01-21T09:12:00Z",
+      "messageType": "text",
+      "processingLatency": 2500,
+      "langsmithTraceId": "trace-studio-london-4"
+    }
+  ],
+  "d3b0cf6b-6ee3-4b3a-b911-a7981aa7c99c": [
+    {
+      "id": "msg-13",
+      "conversationId": "d3b0cf6b-6ee3-4b3a-b911-a7981aa7c99c",
+      "sender": "user",
+      "content": "I want to be sure that if I pay the studio will be mine",
+      "timestamp": "2024-01-23T14:40:43Z",
+      "messageType": "text",
+      "processingLatency": null,
+      "langsmithTraceId": null
+    },
+    {
+      "id": "msg-14",
+      "conversationId": "d3b0cf6b-6ee3-4b3a-b911-a7981aa7c99c",
+      "sender": "ai",
+      "content": "Yes, absolutely! Once you complete the payment, the studio will be reserved for you.",
+      "timestamp": "2024-01-23T14:40:50Z",
+      "messageType": "text",
+      "processingLatency": 2100,
+      "langsmithTraceId": "trace-payment-confirm-1"
+    },
+    {
+      "id": "msg-15",
+      "conversationId": "d3b0cf6b-6ee3-4b3a-b911-a7981aa7c99c",
+      "sender": "human",
+      "content": "Hi! I can confirm that your payment will secure the studio. Would you like me to help you complete the booking?",
+      "timestamp": "2024-01-23T14:45:00Z",
+      "messageType": "text",
+      "processingLatency": null,
+      "langsmithTraceId": null
+    },
+    {
+      "id": "msg-16",
+      "conversationId": "d3b0cf6b-6ee3-4b3a-b911-a7981aa7c99c",
+      "sender": "user",
+      "content": "Yes please, I'd like to proceed",
+      "timestamp": "2024-01-23T14:46:00Z",
+      "messageType": "text",
+      "processingLatency": null,
+      "langsmithTraceId": null
+    }
+  ]
+}

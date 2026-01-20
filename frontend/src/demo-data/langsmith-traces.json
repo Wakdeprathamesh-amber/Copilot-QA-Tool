@@ -1,0 +1,107 @@
+{
+  "trace-abc123": {
+    "traceId": "trace-abc123",
+    "messageId": "msg-2",
+    "prompt": "You are a helpful assistant for Amber Student accommodation. User asked: 'Hello, I'm looking for accommodation'. Help them find suitable accommodation.",
+    "ragContext": "Retrieved 5 properties in London:\n1. iQ East Court - Studios from £169/week\n2. Collegiate Dashwood Studios - Studios from £179/week\n3. Westcombe House - Studios from £189/week",
+    "modelOutput": "Hi! I'd be happy to help you find accommodation. What city are you looking for?",
+    "toolCalls": [
+      {
+        "toolName": "search_properties",
+        "input": { "query": "accommodation" },
+        "output": { "properties": ["property-1", "property-2", "property-3"] },
+        "duration": 450,
+        "success": true
+      }
+    ],
+    "latency": 1200,
+    "timestamp": "2024-09-30T09:02:18Z",
+    "langsmithUrl": "https://smith.langchain.com/o/org-id/projects/proj-id/runs/trace-abc123"
+  },
+  "trace-xyz789": {
+    "traceId": "trace-xyz789",
+    "messageId": "msg-4",
+    "prompt": "User wants confirmation about payment securing their studio booking. Provide reassurance and offer to help with booking process.",
+    "ragContext": "User is interested in studio in London. Previous conversation context shows they were looking at properties.",
+    "modelOutput": "Yes, absolutely! Once you complete the payment, the studio will be reserved for you. Would you like me to guide you through the booking process?",
+    "toolCalls": [
+      {
+        "toolName": "get_booking_info",
+        "input": { "propertyId": "studio-london-123" },
+        "output": { "available": true, "bookingProcess": "standard" },
+        "duration": 320,
+        "success": true
+      }
+    ],
+    "latency": 2100,
+    "timestamp": "2024-01-23T14:40:50Z",
+    "langsmithUrl": "https://smith.langchain.com/o/org-id/projects/proj-id/runs/trace-xyz789"
+  },
+  "trace-studio-london-1": {
+    "traceId": "trace-studio-london-1",
+    "messageId": "msg-7",
+    "prompt": "User is looking for a studio in London. Ask about their move-in date to narrow down options.",
+    "ragContext": "London has 50+ studio options available. Need to filter by move-in date.",
+    "modelOutput": "Great! I can help you find a studio in London. What's your preferred move-in date?",
+    "toolCalls": [],
+    "latency": 1500,
+    "timestamp": "2025-01-21T09:09:15Z",
+    "langsmithUrl": "https://smith.langchain.com/o/org-id/projects/proj-id/runs/trace-studio-london-1"
+  },
+  "trace-studio-london-2": {
+    "traceId": "trace-studio-london-2",
+    "messageId": "msg-9",
+    "prompt": "User wants studio in London for February move-in. Provide specific studio options with pricing.",
+    "ragContext": "Found 12 studios in London available for February:\n- iQ East Court: Bronze Studio £169/week, Silver Studio £179/week\n- Collegiate Dashwood Studios: Standard Studio £179/week\n- Westcombe House: Grand Studio £189/week",
+    "modelOutput": "Perfect! I found several studio options in London available for February move-in. Here are some great options:\n\n1. iQ East Court - Bronze Studio from £169/week\n2. Collegiate Dashwood Studios - Standard Studio from £179/week\n\nWould you like more details about any of these?",
+    "toolCalls": [
+      {
+        "toolName": "search_properties",
+        "input": { "location": "London", "roomType": "studio", "moveInDate": "2025-02" },
+        "output": { "properties": ["iq-east-court", "dashwood-studios", "westcombe-house"] },
+        "duration": 890,
+        "success": true
+      },
+      {
+        "toolName": "get_pricing",
+        "input": { "propertyIds": ["iq-east-court", "dashwood-studios"] },
+        "output": { "prices": { "iq-east-court": "£169/week", "dashwood-studios": "£179/week" } },
+        "duration": 420,
+        "success": true
+      }
+    ],
+    "latency": 3200,
+    "timestamp": "2025-01-21T09:10:00Z",
+    "langsmithUrl": "https://smith.langchain.com/o/org-id/projects/proj-id/runs/trace-studio-london-2"
+  },
+  "trace-studio-london-3": {
+    "traceId": "trace-studio-london-3",
+    "messageId": "msg-11",
+    "prompt": "User repeated 'Need a studio' - they may have missed previous response. Clarify that options shown are studios and offer more help.",
+    "ragContext": "Previous response already showed studio options. User may need clarification.",
+    "modelOutput": "I understand you need a studio. The options I shared are all studios. Would you like me to show you more studio options or do you have questions about the ones I mentioned?",
+    "toolCalls": [],
+    "latency": 1800,
+    "timestamp": "2025-01-21T09:10:35Z",
+    "langsmithUrl": "https://smith.langchain.com/o/org-id/projects/proj-id/runs/trace-studio-london-3"
+  },
+  "trace-payment-confirm-1": {
+    "traceId": "trace-payment-confirm-1",
+    "messageId": "msg-14",
+    "prompt": "User wants confirmation that payment will secure their studio. Provide clear reassurance.",
+    "ragContext": "User is in booking process for studio. Payment confirmation is critical at this stage.",
+    "modelOutput": "Yes, absolutely! Once you complete the payment, the studio will be reserved for you.",
+    "toolCalls": [
+      {
+        "toolName": "check_booking_status",
+        "input": { "userId": "user-123" },
+        "output": { "inProgress": true, "step": "payment" },
+        "duration": 280,
+        "success": true
+      }
+    ],
+    "latency": 2100,
+    "timestamp": "2024-01-23T14:40:50Z",
+    "langsmithUrl": "https://smith.langchain.com/o/org-id/projects/proj-id/runs/trace-payment-confirm-1"
+  }
+}

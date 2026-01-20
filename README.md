@@ -1,0 +1,323 @@
+# QA Tool for AI Chatbot Conversations
+
+Quality Assurance tool for reviewing and rating AI chatbot conversations from Redshift.
+
+---
+
+## 🚀 Quick Start
+
+### 1. Start Backend (Node.js)
+```bash
+cd backend
+npm run dev
+```
+
+Backend runs on **http://localhost:5000**
+
+### 2. Start Frontend (React)
+```bash
+cd frontend
+npm run dev
+```
+
+Frontend runs on **http://localhost:5173**
+
+### 3. Open Browser
+Navigate to **http://localhost:5173**
+
+---
+
+## ✨ Features
+
+- 📋 **Browse Conversations** - Paginated list of WhatsApp/Website conversations
+- 🔍 **Search & Filter** - By channel, CSAT, handover, dates, etc.
+- ⭐ **Rate Conversations** - Good/Okay/Bad ratings
+- 🏷️ **Tag System** - Add custom tags for categorization
+- 📝 **Reviewer Notes** - Save notes with manual "Save Notes" button
+- 📊 **Bulk Actions** - Rate or tag multiple conversations at once
+- 💾 **Data Persistence** - All QA data saved to separate Redshift table
+
+---
+
+## 🏗️ Architecture
+
+### Tech Stack:
+- **Frontend:** React 18 + TypeScript + Tailwind CSS + Vite
+- **Backend:** Node.js + Express + TypeScript
+- **Database:** AWS Redshift (PostgreSQL-compatible)
+- **State:** React Query + Zustand
+- **API:** REST
+
+### Database Tables:
+- `whatsapp_conversations` - Production conversations (read-only)
+- `whatsapp_messages` - Production messages (read-only)
+- `qa_assessments` - QA ratings, tags, notes (read-write)
+
+See `ARCHITECTURE.md` for detailed architecture docs.
+
+---
+
+## 📋 Requirements
+
+- Node.js 18+
+- npm or yarn
+- Access to Redshift database
+- Valid credentials in `backend/.env`
+
+---
+
+## 🔧 Setup
+
+### 1. Clone & Install
+
+```bash
+# Install backend dependencies
+cd backend
+npm install
+
+# Install frontend dependencies
+cd ../frontend
+npm install
+```
+
+### 2. Configure Environment
+
+Create `backend/.env`:
+
+```bash
+# Database (Redshift)
+DB_HOST=your-redshift-host.com
+DB_PORT=5439
+DB_NAME=your_db
+DB_USER=your_user
+DB_PASSWORD=your_password
+DB_SSL=false
+
+# Server
+PORT=5000
+NODE_ENV=development
+```
+
+### 3. Create QA Tables
+
+```bash
+cd backend
+npm run setup-qa-tables
+```
+
+This creates the `qa_assessments` table in your Redshift database.
+
+### 4. Start Servers
+
+**Terminal 1 - Backend:**
+```bash
+cd backend
+npm run dev
+```
+
+**Terminal 2 - Frontend:**
+```bash
+cd frontend
+npm run dev
+```
+
+### 5. Open Application
+
+Navigate to **http://localhost:5173**
+
+---
+
+## 📖 Usage
+
+### Rating Conversations
+
+1. Browse conversations in the list
+2. Click on a conversation to open details
+3. Use the QA Tools Panel on the right to:
+   - Set rating (Good/Okay/Bad)
+   - Add tags
+   - Write reviewer notes
+   - Click "Save Notes" button to save
+
+### Bulk Actions
+
+1. Select multiple conversations using checkboxes
+2. Use the Bulk Actions Bar at the bottom to:
+   - Set rating for all selected
+   - Add tags to all selected
+3. Click "Clear Selection" when done
+
+### Filtering
+
+Use the sidebar to filter by:
+- **Channel:** WhatsApp, Website
+- **CSAT:** Good, Bad, No Rating
+- **Handover:** AI-only or Escalated
+- **Lead Created:** Yes/No
+- **Date Range:** Custom date picker
+- **Search:** By conversation ID
+
+---
+
+## 🎯 Performance
+
+### Optimizations Applied:
+- ✅ Message limit: 200 per conversation
+- ✅ Pagination: 50 conversations per page
+- ✅ Count caching: 60-second cache
+- ✅ Connection pooling: 20 connections
+- ✅ Query timeout: 120 seconds (for Redshift)
+- ✅ Manual save: Notes save on button click (no auto-save)
+
+### Expected Load Times:
+- Conversation list (first page): 4-6 seconds
+- Conversation list (next pages): 2-3 seconds (cached!)
+- Conversation detail: 1-3 seconds
+- QA save operations: <500ms
+
+---
+
+## 🛠️ Development
+
+### Backend Scripts
+
+```bash
+npm run dev          # Start dev server with ts-node
+npm run build        # Compile TypeScript to JavaScript
+npm run start        # Run compiled JavaScript
+npm run setup-qa-tables  # Create QA tables in Redshift
+```
+
+### Frontend Scripts
+
+```bash
+npm run dev          # Start Vite dev server
+npm run build        # Build for production
+npm run preview      # Preview production build
+```
+
+### Key Files
+
+**Backend:**
+- `server.js` - Entry point (uses ts-node)
+- `src/index.ts` - Express app setup
+- `src/routes/` - API endpoints
+- `src/repositories/` - Database queries
+- `src/db/connection.ts` - Redshift connection
+
+**Frontend:**
+- `src/main.tsx` - Entry point
+- `src/App.tsx` - Main app component
+- `src/components/ConversationExplorer.tsx` - Main UI
+- `src/components/QAToolsPanel.tsx` - QA assessment panel
+- `src/services/api.ts` - API client
+
+---
+
+## 📚 Documentation
+
+- `ARCHITECTURE.md` - Detailed architecture and tech stack
+- `QA_TESTING_GUIDE.md` - Complete testing checklist
+- `QUICK_START.md` - Quick setup guide
+- `DATABASE_SCHEMA.md` - Database schema reference
+- `END_TO_END_REVIEW.md` - System review and issues
+- `PERFORMANCE_OPTIMIZATION.md` - Performance fixes applied
+- `PAGINATION_ANALYSIS.md` - Pagination implementation
+- `NOTES_TIMEOUT_FIX.md` - Notes save button fix
+- `REDSHIFT_AUTH_TROUBLESHOOTING.md` - Redshift connection help
+
+---
+
+## 🐛 Troubleshooting
+
+### Backend won't start
+
+**Check .env file:**
+```bash
+ls backend/.env
+```
+
+**View logs:**
+```bash
+cd backend
+npm run dev
+```
+
+**Common issues:**
+- Missing `.env` file
+- Invalid Redshift credentials
+- Port 5000 already in use
+
+### Frontend can't connect
+
+**Check backend is running:**
+```bash
+curl http://localhost:5000/health
+```
+
+**Expected response:**
+```json
+{"status":"ok","timestamp":"..."}
+```
+
+### Slow query performance
+
+- Redshift is a data warehouse (slower than transactional DB)
+- We've optimized with:
+  - Message limits
+  - Pagination
+  - Caching
+  - Increased timeouts
+
+### Connection timeouts
+
+If you see "Connection terminated due to connection timeout":
+- Check Redshift cluster status
+- Query timeout is set to 120 seconds
+- Consider adding more specific filters
+
+---
+
+## 🗑️ Cleanup Notes
+
+### Python API (Not Used)
+
+The `python-api/` folder contains an old Flask implementation that is **NOT currently used**. The active backend is Node.js (`backend/`).
+
+**To remove:**
+```bash
+rm -rf python-api/
+```
+
+This will not affect the running application.
+
+---
+
+## 🔄 Recent Updates
+
+### January 19, 2026
+- ✅ Fixed notes auto-save timeout issue → Added "Save Notes" button
+- ✅ Optimized message loading → Limited to 200 messages
+- ✅ Added pagination count caching → 50% faster navigation
+- ✅ Increased Redshift query timeout → 120 seconds
+- ✅ Cleaned up documentation → Removed 12+ outdated docs
+- ✅ Created ARCHITECTURE.md → Comprehensive tech overview
+
+---
+
+## 📝 License
+
+Internal tool for Amber Data QA team.
+
+---
+
+## 👥 Support
+
+For issues or questions, see:
+- `ARCHITECTURE.md` for system design
+- `QA_TESTING_GUIDE.md` for testing procedures
+- `REDSHIFT_AUTH_TROUBLESHOOTING.md` for connection issues
+
+---
+
+**Last Updated:** January 19, 2026

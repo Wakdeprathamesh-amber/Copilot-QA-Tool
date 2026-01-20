@@ -1,0 +1,198 @@
+[
+  {
+    "id": "66fa69143932cb0a392e9d7f",
+    "channel": "website",
+    "startTime": "2024-09-30T09:02:00Z",
+    "endTime": null,
+    "participantCount": 1,
+    "aiAgentVersion": "v1.2.0",
+    "promptVersion": "v2.1.0",
+    "kbVersion": "v3.0.0",
+    "detectedIntent": "property_search",
+    "outcome": "ongoing",
+    "csat": null,
+    "humanHandover": false,
+    "autoSummary": "User initiated conversation via Zendesk Answer Bot",
+    "createdAt": "2024-09-30T09:02:00Z",
+    "updatedAt": "2025-04-07T09:03:00Z",
+    "phoneNumber": null,
+    "email": null,
+    "status": "open",
+    "endedBy": null,
+    "conversationEvaluation": {
+      "summary": "Initial contact established",
+      "sentiment": "neutral",
+      "intent_clarity": {
+        "is_clear": false,
+        "clarity_reason": "User just started conversation"
+      },
+      "customer_satisfaction": null,
+      "agent_effectiveness": null,
+      "resolution_status": "ongoing"
+    },
+    "userPreferences": {
+      "location": null,
+      "budget": null,
+      "roomType": null,
+      "university": null,
+      "moveInDate": null
+    }
+  },
+  {
+    "id": "6644714bb95bab463267a561",
+    "channel": "whatsapp",
+    "startTime": "2024-06-24T14:24:00Z",
+    "endTime": null,
+    "participantCount": 1,
+    "aiAgentVersion": "v1.1.5",
+    "promptVersion": "v2.0.0",
+    "kbVersion": "v2.9.0",
+    "detectedIntent": "booking_inquiry",
+    "outcome": "ongoing",
+    "csat": null,
+    "humanHandover": false,
+    "autoSummary": "User inquired about booking process via WhatsApp",
+    "createdAt": "2024-06-24T14:24:00Z",
+    "updatedAt": "2025-04-07T09:03:00Z",
+    "phoneNumber": "2348157481033",
+    "email": null,
+    "status": "open",
+    "endedBy": null,
+    "conversationEvaluation": {
+      "summary": "User asked about booking confirmation",
+      "sentiment": "positive",
+      "intent_clarity": {
+        "is_clear": true,
+        "clarity_reason": "User explicitly asked about booking"
+      },
+      "customer_satisfaction": null,
+      "agent_effectiveness": 4,
+      "resolution_status": "ongoing"
+    },
+    "userPreferences": {
+      "location": "London",
+      "budget": "200-300 pounds per week",
+      "roomType": "private_room",
+      "university": null,
+      "moveInDate": "01-2025"
+    }
+  },
+  {
+    "id": "678f645dd6deeaf2235814d7",
+    "channel": "website",
+    "startTime": "2025-01-21T09:09:00Z",
+    "endTime": "2025-01-21T09:15:00Z",
+    "participantCount": 1,
+    "aiAgentVersion": "v1.3.0",
+    "promptVersion": "v2.2.0",
+    "kbVersion": "v3.1.0",
+    "detectedIntent": "property_search",
+    "outcome": "qualified",
+    "csat": "good",
+    "humanHandover": false,
+    "autoSummary": "The user was searching for a studio property in London with a move-in date of February. The chatbot agent provided several studio options available in London and confirmed the reset of user preferences. While the conversation maintained a good flow, there were some repeated queries from the user expressing urgency or clarity on preferences. The conversation concluded positively with available options presented, but the user left without requesting further assistance.",
+    "createdAt": "2025-01-21T09:09:00Z",
+    "updatedAt": "2025-04-07T09:04:00Z",
+    "phoneNumber": null,
+    "email": "loc@lt.com",
+    "status": "open",
+    "endedBy": "user",
+    "conversationEvaluation": {
+      "summary": "The user was searching for a studio property in London with a move-in date of February. The chatbot agent provided several studio options available in London and confirmed the reset of user preferences. While the conversation maintained a good flow, there were some repeated queries from the user expressing urgency or clarity on preferences. The conversation concluded positively with available options presented, but the user left without requesting further assistance.",
+      "sentiment": "positive",
+      "intent_clarity": {
+        "is_clear": true,
+        "clarity_reason": "The user's intent was clear as they explicitly stated they were looking for a property in London, specifying a studio and a move-in date, which directly relates to student accommodation."
+      },
+      "customer_satisfaction": 4,
+      "agent_effectiveness": 4,
+      "resolution_status": "resolved",
+      "customer_frustration": {
+        "repetition_type": "exact_repeat",
+        "query_repetition": 4,
+        "needs_human_escalation": false,
+        "explicit_support_requested": false
+      },
+      "theme": {
+        "main_theme": "property_search",
+        "theme_details": "User searched for a studio in London with a specific move-in date.",
+        "secondary_themes": []
+      },
+      "flow": {
+        "abrupt_reason": "The conversation maintained a logical flow focused on property searching without unrelated topic changes.",
+        "premature_exit": false,
+        "abrupt_transitions": false,
+        "last_outbound_before_dropoff": "If you need more information or have other preferences, feel free to let me know!"
+      }
+    },
+    "userPreferences": {
+      "location": "London",
+      "budget": null,
+      "roomType": null,
+      "university": null,
+      "moveInDate": "February 2025"
+    }
+  },
+  {
+    "id": "6839dfd974ab71854b2bc865",
+    "channel": "whatsapp",
+    "startTime": "2025-05-30T16:42:00Z",
+    "endTime": null,
+    "participantCount": 1,
+    "aiAgentVersion": "v1.3.5",
+    "promptVersion": "v2.3.0",
+    "kbVersion": "v3.2.0",
+    "detectedIntent": "general_inquiry",
+    "outcome": "ongoing",
+    "csat": null,
+    "humanHandover": false,
+    "autoSummary": "User initiated conversation via WhatsApp",
+    "createdAt": "2025-05-30T16:42:00Z",
+    "updatedAt": "2025-05-31T02:00:00Z",
+    "phoneNumber": "919813841767",
+    "email": null,
+    "status": "open",
+    "endedBy": null,
+    "conversationEvaluation": {},
+    "userPreferences": null
+  },
+  {
+    "id": "d3b0cf6b-6ee3-4b3a-b911-a7981aa7c99c",
+    "channel": "whatsapp",
+    "startTime": "2024-01-23T14:40:00Z",
+    "endTime": "2024-01-23T14:50:00Z",
+    "participantCount": 1,
+    "aiAgentVersion": "v1.0.0",
+    "promptVersion": "v1.5.0",
+    "kbVersion": "v2.5.0",
+    "detectedIntent": "booking_confirmation",
+    "outcome": "qualified",
+    "csat": "good",
+    "humanHandover": true,
+    "autoSummary": "User wanted confirmation about studio booking payment",
+    "createdAt": "2024-01-23T14:40:00Z",
+    "updatedAt": "2024-01-23T14:50:00Z",
+    "phoneNumber": "447438728014",
+    "email": "ramonaionecu.ss@gmail.com",
+    "status": "closed",
+    "endedBy": "agent",
+    "conversationEvaluation": {
+      "summary": "User confirmed booking after payment clarification",
+      "sentiment": "positive",
+      "intent_clarity": {
+        "is_clear": true,
+        "clarity_reason": "User explicitly asked about payment and booking confirmation"
+      },
+      "customer_satisfaction": 5,
+      "agent_effectiveness": 5,
+      "resolution_status": "resolved"
+    },
+    "userPreferences": {
+      "location": "London",
+      "budget": "150-200 pounds per week",
+      "roomType": "studio",
+      "university": null,
+      "moveInDate": "September 2024"
+    }
+  }
+]
