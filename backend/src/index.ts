@@ -70,8 +70,11 @@ const startServer = async () => {
 
     app.listen(PORT, () => {
       console.log(`✓ Server running on port ${PORT}`);
-      console.log(`✓ Health check: http://localhost:${PORT}/health`);
-      console.log(`✓ API endpoint: http://localhost:${PORT}/api`);
+      console.log(`✓ Health check: /health`);
+      console.log(`✓ API endpoint: /api`);
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`✓ Local access: http://localhost:${PORT}`);
+      }
     });
   } catch (error: any) {
     console.error('✗ Failed to start server:', error.message);

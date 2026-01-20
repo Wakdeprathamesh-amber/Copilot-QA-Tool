@@ -4,7 +4,41 @@ Quality Assurance tool for reviewing and rating AI chatbot conversations from Re
 
 ---
 
-## 🚀 Quick Start
+## 🚀 For DevOps / Deployment
+
+**👉 See [`DEPLOYMENT.md`](./DEPLOYMENT.md) for complete production deployment guide.**
+
+### Quick Deployment Checklist:
+
+**Backend Environment Variables (Required):**
+```bash
+DB_HOST=your-redshift-host.com
+DB_PORT=5439
+DB_NAME=your_database
+DB_USER=your_username
+DB_PASSWORD=your_password
+DB_SSL=true
+PORT=5000
+NODE_ENV=production
+FRONTEND_URL=https://your-frontend-domain.com  # ⚠️ Required for CORS
+```
+
+**Frontend Environment Variables (Required):**
+```bash
+VITE_API_URL=https://your-backend-api.com/api  # ⚠️ Must include /api
+```
+
+**Important Notes:**
+- Frontend must be **rebuilt** after changing `VITE_API_URL` (Vite env vars are baked in at build time)
+- `FRONTEND_URL` in backend must match frontend domain exactly (CORS)
+- All URLs are environment-based (no hardcoded localhost in production code)
+- Health check endpoint: `/health`
+
+See `DEPLOYMENT.md` for detailed deployment instructions, Docker configs, CI/CD examples, and troubleshooting.
+
+---
+
+## 🚀 Quick Start (Development)
 
 ### 1. Start Backend (Node.js)
 ```bash
@@ -82,8 +116,19 @@ npm install
 
 ### 2. Configure Environment
 
-Create `backend/.env`:
+Copy the example files and configure:
 
+```bash
+# Backend
+cp backend/.env.example backend/.env
+# Edit backend/.env with your credentials
+
+# Frontend (optional for dev, uses localhost by default)
+cp frontend/.env.example frontend/.env
+# Edit frontend/.env if needed
+```
+
+**Backend `.env` file:**
 ```bash
 # Database (Redshift)
 DB_HOST=your-redshift-host.com
@@ -96,6 +141,14 @@ DB_SSL=false
 # Server
 PORT=5000
 NODE_ENV=development
+
+# Frontend URL (for CORS)
+FRONTEND_URL=http://localhost:3000
+```
+
+**Frontend `.env` file (optional for dev):**
+```bash
+VITE_API_URL=http://localhost:5000/api
 ```
 
 ### 3. Create QA Tables
@@ -216,6 +269,7 @@ npm run preview      # Preview production build
 
 ## 📚 Documentation
 
+- `DEPLOYMENT.md` - **Production deployment guide** (environment variables, CI/CD, security)
 - `ARCHITECTURE.md` - Detailed architecture and tech stack
 - `QA_TESTING_GUIDE.md` - Complete testing checklist
 - `QUICK_START.md` - Quick setup guide
@@ -296,6 +350,10 @@ This will not affect the running application.
 ## 🔄 Recent Updates
 
 ### January 19, 2026
+- ✅ **Added DEPLOYMENT.md** → Complete production deployment guide for DevOps
+- ✅ **Removed hardcoded localhost** → All URLs now use environment variables
+- ✅ **Added environment variable examples** → `.env.example` files for both frontend and backend
+- ✅ **Updated for production readiness** → Deployment-friendly configuration
 - ✅ Fixed notes auto-save timeout issue → Added "Save Notes" button
 - ✅ Optimized message loading → Limited to 200 messages
 - ✅ Added pagination count caching → 50% faster navigation
@@ -314,9 +372,10 @@ Internal tool for Amber Data QA team.
 ## 👥 Support
 
 For issues or questions, see:
-- `ARCHITECTURE.md` for system design
-- `QA_TESTING_GUIDE.md` for testing procedures
-- `REDSHIFT_AUTH_TROUBLESHOOTING.md` for connection issues
+- **`DEPLOYMENT.md`** - Production deployment guide (DevOps team)
+- `ARCHITECTURE.md` - System design and architecture
+- `QA_TESTING_GUIDE.md` - Testing procedures
+- `REDSHIFT_AUTH_TROUBLESHOOTING.md` - Database connection issues
 
 ---
 

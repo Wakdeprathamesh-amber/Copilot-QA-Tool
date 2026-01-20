@@ -273,8 +273,9 @@ export const ConversationExplorer = () => {
             <p className="text-red-600 text-sm">
               Please check:
               <ul className="list-disc list-inside mt-1">
-                <li>Backend server is running on http://localhost:5000</li>
+                <li>Backend server is running and accessible</li>
                 <li>Check browser console for more details</li>
+                <li>Verify API URL configuration</li>
               </ul>
             </p>
             <button
