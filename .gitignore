@@ -18,6 +18,7 @@ dist/
 .env.development.local
 .env.test.local
 .env.production.local
+.env.docker
 
 # IDE
 .vscode/
@@ -39,3 +40,6 @@ Thumbs.db
 
 # Redis
 dump.rdb
+
+# Docker
+docker-compose.override.yml

@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  # Frontend with Nginx
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: ai-eval-frontend-local
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    networks:
+      - ai-eval-network
+
+  # Backend API
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: ai-eval-backend-local
+    environment:
+      - NODE_ENV=development
+      - PORT=5000
+      - DB_HOST=redshift-prod.amber-data.com
+      - DB_PORT=5439
+      - DB_NAME=amberdb
+      - DB_USER=data_engg
+      - DB_PASSWORD=Data_engg_123
+      - DB_SSL=false
+      - JWT_SECRET=local-dev-secret-key
+      - FRONTEND_URL=http://localhost:8080
+    ports:
+      - "5001:5000"
+    networks:
+      - ai-eval-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5000/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  ai-eval-network:
+    driver: bridge

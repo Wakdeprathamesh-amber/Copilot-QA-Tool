@@ -40,6 +40,32 @@ See `DEPLOYMENT.md` for detailed deployment instructions, Docker configs, CI/CD 
 
 ## 🚀 Quick Start (Development)
 
+### Option 1: Docker (Recommended)
+
+**Prerequisites:**
+- Docker and Docker Compose installed
+- Copy environment files and configure credentials
+
+**Setup:**
+```bash
+# 1. Copy environment templates
+cp backend/.env.example backend/.env
+cp .env.docker.example .env.docker
+
+# 2. Edit backend/.env with your Redshift credentials
+# 3. Edit .env.docker with your local settings
+
+# 4. Start with Docker
+docker-compose -f docker-compose.local.yml up --build
+```
+
+**Access:**
+- **Frontend:** http://localhost:8080
+- **Backend API:** http://localhost:8080/api
+- **Health Check:** http://localhost:8080/health
+
+### Option 2: Manual Setup
+
 ### 1. Start Backend (Node.js)
 ```bash
 cd backend
@@ -58,6 +84,39 @@ Frontend runs on **http://localhost:5173**
 
 ### 3. Open Browser
 Navigate to **http://localhost:5173**
+
+---
+
+## 🐳 Docker Setup
+
+### Development with Docker
+
+The application includes a complete Docker setup for local development that mirrors production:
+
+```bash
+# Start all services (frontend, backend, postgres, redis)
+docker-compose -f docker-compose.local.yml up --build
+
+# Stop all services
+docker-compose -f docker-compose.local.yml down
+```
+
+**What's included:**
+- **Frontend**: React app with Nginx (port 8080)
+- **Backend**: Node.js API (port 5001, proxied through Nginx)
+- **PostgreSQL**: Local database (port 5433)
+- **Redis**: Cache service (port 6380)
+
+### Production Docker
+
+For production deployment:
+
+```bash
+# Production build
+docker-compose -f docker-compose.prod.yml up --build
+```
+
+See `DEPLOYMENT.md` for complete production deployment instructions.
 
 ---
 

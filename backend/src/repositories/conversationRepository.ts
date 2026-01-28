@@ -262,11 +262,23 @@ export const conversationRepository = {
   },
 
   async getFilterOptions() {
-    // Return static filter options for now
+    // Return filter options in the format expected by frontend
     return {
-      intents: ['general_inquiry', 'support', 'sales', 'billing'],
-      channels: ['website', 'whatsapp'],
-      outcomes: ['qualified', 'dropped', 'escalated', 'ongoing']
+      csatOptions: [
+        { value: 'good', label: 'Good' },
+        { value: 'bad', label: 'Bad' },
+        { value: null, label: 'No Rating' }
+      ],
+      intentOptions: ['general_inquiry', 'support', 'sales', 'billing'],
+      channelOptions: [
+        { value: 'website', label: 'Website' },
+        { value: 'whatsapp', label: 'WhatsApp' }
+      ],
+      leadCreatedOptions: [
+        { value: true, label: 'Lead Created' },
+        { value: false, label: 'Lead Not Created' },
+        { value: null, label: 'No Lead Data' }
+      ]
     };
   }
 };
