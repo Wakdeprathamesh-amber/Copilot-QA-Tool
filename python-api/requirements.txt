@@ -1,5 +1,0 @@
-flask==3.0.0
-flask-cors==4.0.0
-redshift-connector==2.0.918
-python-dotenv==1.0.0
-pyyaml==6.0.1

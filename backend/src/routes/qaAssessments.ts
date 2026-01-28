@@ -44,7 +44,7 @@ router.get('/:conversationId', async (req: Request, res: Response) => {
     
     res.json({ data: assessment });
   } catch (error) {
-    logger.error('Error fetching QA assessment', { conversationId, error });
+    logger.error('Error fetching QA assessment', { conversationId: req.params.conversationId, error });
     res.status(500).json({ error: 'Failed to fetch QA assessment' });
   }
 });
@@ -62,7 +62,7 @@ router.post('/:conversationId/rating', async (req: Request, res: Response) => {
     const assessment = await qaAssessmentRepository.setRating(conversationId, rating);
     res.json({ data: assessment });
   } catch (error) {
-    logger.error('Error setting rating', { conversationId, rating, error });
+    logger.error('Error setting rating', { conversationId: req.params.conversationId, rating: req.body.rating, error });
     res.status(500).json({ error: 'Failed to set rating' });
   }
 });
@@ -80,7 +80,7 @@ router.post('/:conversationId/tags', async (req: Request, res: Response) => {
     await qaAssessmentRepository.addTags(conversationId, tags);
     res.json({ success: true });
   } catch (error) {
-    logger.error('Error adding tags', { conversationId, tags, error });
+    logger.error('Error adding tags', { conversationId: req.params.conversationId, tags: req.body.tags, error });
     res.status(500).json({ error: 'Failed to add tags' });
   }
 });
@@ -98,7 +98,7 @@ router.delete('/:conversationId/tags', async (req: Request, res: Response) => {
     await qaAssessmentRepository.removeTags(conversationId, tags);
     res.json({ success: true });
   } catch (error) {
-    logger.error('Error removing tags', { conversationId, tags, error });
+    logger.error('Error removing tags', { conversationId: req.params.conversationId, tags: req.body.tags, error });
     res.status(500).json({ error: 'Failed to remove tags' });
   }
 });
@@ -116,7 +116,7 @@ router.post('/:conversationId/notes', async (req: Request, res: Response) => {
     const assessment = await qaAssessmentRepository.setNotes(conversationId, notes);
     res.json({ data: assessment });
   } catch (error) {
-    logger.error('Error setting notes', { conversationId, error });
+    logger.error('Error setting notes', { conversationId: req.params.conversationId, error });
     res.status(500).json({ error: 'Failed to set notes' });
   }
 });
@@ -130,7 +130,7 @@ router.patch('/:conversationId', async (req: Request, res: Response) => {
     const assessment = await qaAssessmentRepository.update(conversationId, updates);
     res.json({ data: assessment });
   } catch (error) {
-    logger.error('Error updating assessment', { conversationId, updates, error });
+    logger.error('Error updating assessment', { conversationId: req.params.conversationId, updates: req.body, error });
     res.status(500).json({ error: 'Failed to update assessment' });
   }
 });

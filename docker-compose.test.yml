@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  # Backend API
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: ai-eval-backend-test
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+      # Use existing Redshift database
+      - DB_HOST=redshift-prod.amber-data.com
+      - DB_PORT=5439
+      - DB_NAME=amberdb
+      - DB_USER=data_engg
+      - DB_PASSWORD=Data_engg_123
+      - DB_SSL=false
+      - JWT_SECRET=dev-secret-key-change-in-production
+      - JWT_EXPIRES_IN=8h
+      - LANGSMITH_ORG=4ce2d88f-009f-44af-a64e-844def8d1961
+      - LANGSMITH_PROJECT=p/7089bd0f-1383-425f-a03d-e08ea0e26449
+    ports:
+      - "5000:5000"
+    restart: unless-stopped
+    networks:
+      - ai-eval-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Frontend with Nginx
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: ai-eval-frontend-test
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - ai-eval-network
+
+networks:
+  ai-eval-network:
+    driver: bridge

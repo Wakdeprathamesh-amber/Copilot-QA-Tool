@@ -62,7 +62,7 @@ router.get('/:id/debug', async (req: Request, res: Response) => {
       langsmithUrl: langsmithUrl,
     });
   } catch (error) {
-    logger.error('Error fetching message debug info', { id, error });
+    logger.error('Error fetching message debug info', { messageId: req.params.id, error });
     res.status(500).json({ error: 'Failed to fetch debug info' });
   }
 });

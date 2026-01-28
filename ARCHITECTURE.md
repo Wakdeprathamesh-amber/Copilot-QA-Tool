@@ -42,22 +42,39 @@
 - `src/services/api.ts` - API client
 - `src/hooks/useConversations.ts` - Data hooks
 
-### ❌ **Python API** - INACTIVE / NOT USED
-**Location:** `python-api/`  
-**Status:** Old/alternative implementation, not currently used  
-**Action:** Can be safely removed
-
 ---
 
 ## Database
 
 **Type:** AWS Redshift (PostgreSQL-compatible)  
-**Production Tables:**
-- `whatsapp_conversations` - Customer conversations (read-only)
-- `whatsapp_messages` - Conversation messages (read-only)
 
-**QA Tables:**
-- `qa_assessments` - QA ratings, tags, notes (read-write)
+### Production Tables (Read-Only):
+**`whatsapp_conversations`**
+- `conversation_id` (VARCHAR) - Primary key
+- `created_at` (TIMESTAMP) - Conversation start time
+- `channel` (VARCHAR) - 'whatsapp' or 'website'
+- `csat_rating` (VARCHAR) - Customer satisfaction rating
+- `handover_occurred` (BOOLEAN) - Whether escalated to human
+- `lead_created` (BOOLEAN) - Whether lead was generated
+- `source_details` (VARCHAR) - JSON metadata
+
+**`whatsapp_messages`**
+- `message_id` (VARCHAR) - Primary key
+- `conversation_id` (VARCHAR) - Foreign key to conversations
+- `created_at` (TIMESTAMP) - Message timestamp
+- `sender_type` (VARCHAR) - 'user' or 'bot'
+- `message_text` (VARCHAR) - Message content
+- `metadata` (VARCHAR) - JSON metadata
+
+### QA Tables (Read-Write):
+**`qa_assessments`**
+- `conversation_id` (VARCHAR) - Primary key, links to conversations
+- `rating` (VARCHAR) - 'good', 'okay', 'bad', or NULL
+- `tags` (VARCHAR) - JSON array of tag strings
+- `notes` (TEXT) - Reviewer notes
+- `reviewer_id` (VARCHAR) - Who did the assessment
+- `created_at` (TIMESTAMP) - When assessment was created
+- `updated_at` (TIMESTAMP) - Last modification time
 
 **Connection:**
 - Configured in `backend/.env`
@@ -162,8 +179,6 @@ Redshift (PostgreSQL)
 │   │   └── hooks/         # Custom hooks
 │   └── package.json
 │
-├── python-api/            # Flask API (INACTIVE - can delete)
-│
 └── *.md                   # Documentation
 ```
 
@@ -260,4 +275,4 @@ VITE_API_URL=http://localhost:5000/api
 
 ---
 
-**Last Updated:** Jan 19, 2026
+**Last Updated:** January 28, 2026

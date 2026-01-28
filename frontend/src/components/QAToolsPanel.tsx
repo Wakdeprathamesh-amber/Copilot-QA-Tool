@@ -368,16 +368,16 @@ export const QAToolsPanel = ({ conversation }: QAToolsPanelProps) => {
         <h3 className="text-sm font-medium text-gray-700 mb-2">System Metadata</h3>
         <dl className="space-y-1 text-sm">
           <div className="flex justify-between">
-            <dt className="text-gray-500">AI Agent Version:</dt>
-            <dd className="text-gray-900 font-medium">{conversation.aiAgentVersion}</dd>
+            <dt className="text-gray-500">Interaction Type:</dt>
+            <dd className="text-gray-900 font-medium">{conversation.interactionType}</dd>
           </div>
           <div className="flex justify-between">
-            <dt className="text-gray-500">Prompt Version:</dt>
-            <dd className="text-gray-900 font-medium">{conversation.promptVersion}</dd>
+            <dt className="text-gray-500">Participant Count:</dt>
+            <dd className="text-gray-900 font-medium">{conversation.participantCount}</dd>
           </div>
           <div className="flex justify-between">
-            <dt className="text-gray-500">KB Version:</dt>
-            <dd className="text-gray-900 font-medium">{conversation.kbVersion}</dd>
+            <dt className="text-gray-500">Detected Intent:</dt>
+            <dd className="text-gray-900 font-medium">{conversation.detectedIntent || 'None'}</dd>
           </div>
           <div className="flex justify-between">
             <dt className="text-gray-500">Channel:</dt>

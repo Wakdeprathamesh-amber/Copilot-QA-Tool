@@ -269,16 +269,8 @@ npm run preview      # Preview production build
 
 ## 📚 Documentation
 
-- `DEPLOYMENT.md` - **Production deployment guide** (environment variables, CI/CD, security)
+- `DEPLOYMENT.md` - Production deployment guide (environment variables, Docker, troubleshooting)
 - `ARCHITECTURE.md` - Detailed architecture and tech stack
-- `QA_TESTING_GUIDE.md` - Complete testing checklist
-- `QUICK_START.md` - Quick setup guide
-- `DATABASE_SCHEMA.md` - Database schema reference
-- `END_TO_END_REVIEW.md` - System review and issues
-- `PERFORMANCE_OPTIMIZATION.md` - Performance fixes applied
-- `PAGINATION_ANALYSIS.md` - Pagination implementation
-- `NOTES_TIMEOUT_FIX.md` - Notes save button fix
-- `REDSHIFT_AUTH_TROUBLESHOOTING.md` - Redshift connection help
 
 ---
 
@@ -314,52 +306,44 @@ curl http://localhost:5000/health
 {"status":"ok","timestamp":"..."}
 ```
 
-### Slow query performance
+### Redshift Connection Issues
+
+**Password Authentication Failed (28000):**
+- Verify DB_USER and DB_PASSWORD in backend/.env
+- Check if password has special characters (may need quotes)
+- Ensure user exists and has proper permissions in Redshift
+
+**Network/Timeout Errors:**
+- Check if Redshift cluster is running
+- Verify network/VPN access
+- Check security group allows your IP
+- Query timeout is set to 120 seconds
+
+### Performance Issues
 
 - Redshift is a data warehouse (slower than transactional DB)
-- We've optimized with:
-  - Message limits
-  - Pagination
-  - Caching
-  - Increased timeouts
-
-### Connection timeouts
-
-If you see "Connection terminated due to connection timeout":
-- Check Redshift cluster status
-- Query timeout is set to 120 seconds
-- Consider adding more specific filters
-
----
-
-## 🗑️ Cleanup Notes
-
-### Python API (Not Used)
-
-The `python-api/` folder contains an old Flask implementation that is **NOT currently used**. The active backend is Node.js (`backend/`).
-
-**To remove:**
-```bash
-rm -rf python-api/
-```
-
-This will not affect the running application.
+- We've optimized with message limits, pagination, caching, and increased timeouts
+- Consider adding more specific filters for large datasets
 
 ---
 
 ## 🔄 Recent Updates
 
+### January 28, 2026
+- ✅ **Production Docker Setup** → Complete containerized deployment ready
+- ✅ **Documentation Cleanup** → Removed 12+ outdated docs, kept only essentials
+- ✅ **Nginx Configuration** → Fixed API routing for production
+- ✅ **Environment Variables** → Production-ready configuration
+- ✅ **Health Checks** → All services monitored and tested
+
 ### January 19, 2026
-- ✅ **Added DEPLOYMENT.md** → Complete production deployment guide for DevOps
-- ✅ **Removed hardcoded localhost** → All URLs now use environment variables
-- ✅ **Added environment variable examples** → `.env.example` files for both frontend and backend
-- ✅ **Updated for production readiness** → Deployment-friendly configuration
+- ✅ **Added DEPLOYMENT.md** → Complete production deployment guide
+- ✅ **Removed hardcoded localhost** → All URLs use environment variables
+- ✅ **Added environment variable examples** → `.env.example` files
 - ✅ Fixed notes auto-save timeout issue → Added "Save Notes" button
 - ✅ Optimized message loading → Limited to 200 messages
 - ✅ Added pagination count caching → 50% faster navigation
 - ✅ Increased Redshift query timeout → 120 seconds
-- ✅ Cleaned up documentation → Removed 12+ outdated docs
-- ✅ Created ARCHITECTURE.md → Comprehensive tech overview
 
 ---
 
@@ -372,11 +356,9 @@ Internal tool for Amber Data QA team.
 ## 👥 Support
 
 For issues or questions, see:
-- **`DEPLOYMENT.md`** - Production deployment guide (DevOps team)
+- **`DEPLOYMENT.md`** - Production deployment guide
 - `ARCHITECTURE.md` - System design and architecture
-- `QA_TESTING_GUIDE.md` - Testing procedures
-- `REDSHIFT_AUTH_TROUBLESHOOTING.md` - Database connection issues
 
 ---
 
-**Last Updated:** January 19, 2026
+**Last Updated:** January 28, 2026
