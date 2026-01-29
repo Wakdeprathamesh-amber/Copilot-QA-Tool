@@ -36,7 +36,7 @@ services:
     autoDeploy: true
 
   # Frontend Static Site (Recommended - Fastest & Cheapest)
-  - type: static
+  - type: staticSite
     name: qa-tool-frontend
     buildCommand: cd frontend && npm install && npm run build
     staticPublishPath: frontend/dist
