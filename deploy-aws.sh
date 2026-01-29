@@ -80,10 +80,6 @@ build_images() {
     echo "Building backend image..."
     docker build -f Dockerfile.backend -t ${APP_NAME}-backend:latest .
     
-    # Build python-api
-    echo "Building python-api image..."
-    docker build -f Dockerfile.python-api -t ${APP_NAME}-python-api:latest .
-    
     print_status "All images built successfully"
 }
 
@@ -101,17 +97,12 @@ push_to_ecr() {
     aws ecr describe-repositories --repository-names ${APP_NAME}-backend --region ${AWS_REGION} || \
         aws ecr create-repository --repository-name ${APP_NAME}-backend --region ${AWS_REGION}
     
-    aws ecr describe-repositories --repository-names ${APP_NAME}-python-api --region ${AWS_REGION} || \
-        aws ecr create-repository --repository-name ${APP_NAME}-python-api --region ${AWS_REGION}
-    
     # Tag and push images
     docker tag ${APP_NAME}-frontend:latest ${DOCKER_REGISTRY}/${APP_NAME}-frontend:latest
     docker tag ${APP_NAME}-backend:latest ${DOCKER_REGISTRY}/${APP_NAME}-backend:latest
-    docker tag ${APP_NAME}-python-api:latest ${DOCKER_REGISTRY}/${APP_NAME}-python-api:latest
     
     docker push ${DOCKER_REGISTRY}/${APP_NAME}-frontend:latest
     docker push ${DOCKER_REGISTRY}/${APP_NAME}-backend:latest
-    docker push ${DOCKER_REGISTRY}/${APP_NAME}-python-api:latest
     
     print_status "Images pushed to ECR successfully"
 }
@@ -152,16 +143,10 @@ health_check() {
     sleep 30
     
     # Check if services are responding
-    if curl -f http://localhost/api/health > /dev/null 2>&1; then
+    if curl -f http://localhost/health > /dev/null 2>&1; then
         print_status "Backend health check passed"
     else
         print_warning "Backend health check failed"
-    fi
-    
-    if curl -f http://localhost/python-api/health > /dev/null 2>&1; then
-        print_status "Python API health check passed"
-    else
-        print_warning "Python API health check failed"
     fi
 }
 
@@ -208,7 +193,7 @@ main() {
     echo -e "${BLUE}Access your application at:${NC}"
     echo "Frontend: http://your-domain-or-ip"
     echo "Backend API: http://your-domain-or-ip/api"
-    echo "Python API: http://your-domain-or-ip/python-api"
+    echo "Health Check: http://your-domain-or-ip/health"
 }
 
 # Run main function
