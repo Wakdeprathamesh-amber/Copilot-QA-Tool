@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // @ts-ignore - Vite env types
-const API_URL = import.meta.env?.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL = import.meta.env?.VITE_API_URL || 'http://34.254.66.140:5000/api';
 
 const apiClient = axios.create({
   baseURL: API_URL,
