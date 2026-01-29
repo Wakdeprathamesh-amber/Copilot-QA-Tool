@@ -4,9 +4,31 @@ This guide provides instructions for deploying the QA Tool for AI Chatbot to pro
 
 ---
 
+## 🚀 Quick Start: Render Deployment (Recommended)
+
+**👉 For Render deployment, see [`RENDER_DEPLOYMENT.md`](./RENDER_DEPLOYMENT.md) for complete guide.**
+
+Render is the recommended deployment platform for this application. It provides:
+- ✅ Easy Docker-based deployment
+- ✅ Free SSL certificates
+- ✅ Automatic deployments from Git
+- ✅ Built-in health checks
+- ✅ Simple environment variable management
+
+**Quick Steps:**
+1. Push code to GitHub/GitLab/Bitbucket
+2. Connect repository to Render
+3. Use `render.yaml` blueprint (auto-detected) OR manually create services
+4. Set environment variables
+5. Deploy!
+
+See `RENDER_DEPLOYMENT.md` for detailed instructions.
+
+---
+
 ## 📋 Prerequisites
 
-- Node.js 18+ installed on the server
+- Node.js 18+ installed on the server (for non-Docker deployments)
 - Access to AWS Redshift database
 - Environment variables configured
 - Network access to Redshift cluster

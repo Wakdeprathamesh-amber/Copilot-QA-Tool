@@ -1,0 +1,92 @@
+# Render Blueprint for QA Tool for AI Chatbot
+# This file defines the services to deploy on Render
+
+services:
+  # Backend API Service (Native Node.js - Faster & Simpler)
+  - type: web
+    name: qa-tool-backend
+    runtime: node
+    plan: starter  # Can be upgraded to standard/professional
+    buildCommand: cd backend && npm install && npm run build
+    startCommand: cd backend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: DB_HOST
+        sync: false  # Set in Render dashboard
+      - key: DB_PORT
+        value: 5439
+      - key: DB_NAME
+        sync: false  # Set in Render dashboard
+      - key: DB_USER
+        sync: false  # Set in Render dashboard
+      - key: DB_PASSWORD
+        sync: false  # Set in Render dashboard (use secret)
+      - key: DB_SSL
+        value: "true"
+      - key: FRONTEND_URL
+        sync: false  # Set after frontend is deployed
+      - key: JWT_SECRET
+        generateValue: true  # Auto-generate secure secret
+      - key: JWT_EXPIRES_IN
+        value: 8h
+    healthCheckPath: /health
+    autoDeploy: true
+
+  # Frontend Static Site (Recommended - Fastest & Cheapest)
+  - type: static
+    name: qa-tool-frontend
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: frontend/dist
+    envVars:
+      - key: VITE_API_URL
+        sync: false  # Set after backend is deployed (e.g., https://qa-tool-backend.onrender.com/api)
+    pullRequestPreviewsEnabled: true
+    autoDeploy: true
+
+  # Alternative: Backend Docker (uncomment if you prefer Docker)
+  # - type: web
+  #   name: qa-tool-backend-docker
+  #   runtime: docker
+  #   plan: starter
+  #   dockerfilePath: ./Dockerfile.backend
+  #   dockerContext: .
+  #   envVars:
+  #     - key: NODE_ENV
+  #       value: production
+  #     - key: PORT
+  #       value: 5000
+  #     - key: DB_HOST
+  #       sync: false
+  #     - key: DB_PORT
+  #       value: 5439
+  #     - key: DB_NAME
+  #       sync: false
+  #     - key: DB_USER
+  #       sync: false
+  #     - key: DB_PASSWORD
+  #       sync: false
+  #     - key: DB_SSL
+  #       value: "true"
+  #     - key: FRONTEND_URL
+  #       sync: false
+  #     - key: JWT_SECRET
+  #       generateValue: true
+  #   healthCheckPath: /health
+  #   autoDeploy: true
+
+  # Alternative: Frontend Docker Web Service (not recommended - unnecessary overhead)
+  # - type: web
+  #   name: qa-tool-frontend-docker
+  #   runtime: docker
+  #   plan: starter
+  #   dockerfilePath: ./Dockerfile.frontend.render
+  #   dockerContext: .
+  #   envVars:
+  #     - key: VITE_API_URL
+  #       sync: false
+  #     - key: BACKEND_URL
+  #       sync: false
+  #   autoDeploy: true

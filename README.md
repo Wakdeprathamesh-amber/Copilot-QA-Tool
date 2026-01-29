@@ -6,7 +6,31 @@ Quality Assurance tool for reviewing and rating AI chatbot conversations from Re
 
 ## 🚀 For DevOps / Deployment
 
-**👉 See [`DEPLOYMENT.md`](./DEPLOYMENT.md) for complete production deployment guide.**
+### 🎯 Recommended: Render Deployment
+
+**👉 See [`RENDER_DEPLOYMENT.md`](./RENDER_DEPLOYMENT.md) for complete Render deployment guide.**
+
+Render is the recommended platform for deploying this application:
+- ✅ **Easy Setup:** Connect GitHub repo and deploy with one click
+- ✅ **Docker Support:** Uses existing Dockerfiles
+- ✅ **Free SSL:** Automatic HTTPS certificates
+- ✅ **Auto Deploy:** Deploys on every Git push
+- ✅ **Health Checks:** Built-in monitoring
+- ✅ **Simple Config:** Use `render.yaml` blueprint
+
+**Quick Start on Render:**
+1. Push code to GitHub
+2. Connect to Render → Use Blueprint (auto-detects `render.yaml`)
+3. Set environment variables
+4. Deploy!
+
+See [`RENDER_DEPLOYMENT.md`](./RENDER_DEPLOYMENT.md) for detailed instructions.
+
+---
+
+### 📚 Other Deployment Options
+
+**👉 See [`DEPLOYMENT.md`](./DEPLOYMENT.md) for complete production deployment guide (AWS, VPS, etc.).**
 
 ### Quick Deployment Checklist:
 
