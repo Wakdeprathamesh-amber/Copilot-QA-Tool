@@ -81,7 +81,7 @@ export interface Message {
 }
 
 export interface ConversationFilters {
-  csat?: ('good' | 'bad' | null)[];
+  csat?: ('good' | 'okay' | 'bad' | null)[];
   intent?: string[];
   channel?: ('website' | 'whatsapp')[];
   dateFrom?: string;

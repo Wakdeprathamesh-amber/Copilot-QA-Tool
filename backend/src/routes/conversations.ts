@@ -16,10 +16,10 @@ router.get('/', async (req: Request, res: Response) => {
     // Parse filters
     const filters: ConversationFilters = {};
 
-    // CSAT filter
+    // CSAT/QA Rating filter (human QA assessments: good, okay, bad, No Rating)
     if (req.query.csat) {
       const csatArray = Array.isArray(req.query.csat) ? req.query.csat : [req.query.csat];
-      filters.csat = csatArray.map(c => c === 'null' ? null : c as 'good' | 'bad');
+      filters.csat = csatArray.map(c => c === 'null' ? null : c as 'good' | 'okay' | 'bad');
     }
 
     // Channel filter

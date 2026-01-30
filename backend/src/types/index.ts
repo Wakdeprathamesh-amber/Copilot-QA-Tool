@@ -76,7 +76,7 @@ export interface User {
 }
 
 export interface ConversationFilters {
-  csat?: (CSAT)[];
+  csat?: ('good' | 'okay' | 'bad' | null)[];
   intent?: string[];
   channel?: Channel[];
   dateFrom?: string;

@@ -35,7 +35,12 @@ export const ConversationFiltersComponent = ({ filters, onFiltersChange }: Conve
   }, [localFilters]);
 
   const updateFilter = (key: keyof ConversationFilters, value: any) => {
-    const newFilters = { ...localFilters, [key]: value };
+    const newFilters = { ...localFilters };
+    if (value === undefined || value === '') {
+      delete newFilters[key];
+    } else {
+      newFilters[key] = value;
+    }
     setLocalFilters(newFilters);
     // Don't apply immediately - wait for Apply button
   };
@@ -107,16 +112,16 @@ export const ConversationFiltersComponent = ({ filters, onFiltersChange }: Conve
       </div>
 
       <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ${isExpanded ? '' : 'hidden'}`}>
-        {/* CSAT Filter */}
+        {/* QA Rating Filter (human assessments from QA tool) */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">CSAT</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">QA Rating</label>
           <div className="space-y-2">
-            {filterOptions?.csatOptions.map((option) => (
+            {filterOptions?.csatOptions?.map((option) => (
               <label key={option.value === null ? 'null' : option.value || 'null'} className="flex items-center">
                 <input
                   type="checkbox"
-                  checked={(localFilters.csat || []).includes(option.value as 'good' | 'bad' | null)}
-                  onChange={() => toggleArrayFilter('csat', option.value as 'good' | 'bad' | null)}
+                  checked={(localFilters.csat || []).includes(option.value as 'good' | 'okay' | 'bad' | null)}
+                  onChange={() => toggleArrayFilter('csat', option.value as 'good' | 'okay' | 'bad' | null)}
                   className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 />
                 <span className="ml-2 text-sm text-gray-700">{option.label}</span>
@@ -129,7 +134,7 @@ export const ConversationFiltersComponent = ({ filters, onFiltersChange }: Conve
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Channel</label>
           <div className="space-y-2">
-            {filterOptions?.channelOptions.map((option) => (
+            {filterOptions?.channelOptions?.map((option) => (
               <label key={option.value} className="flex items-center">
                 <input
                   type="checkbox"
@@ -240,12 +245,27 @@ export const ConversationFiltersComponent = ({ filters, onFiltersChange }: Conve
         <div className="mt-4 flex flex-wrap gap-2">
           {localFilters.csat && localFilters.csat.length > 0 && (
             <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
-              CSAT: {localFilters.csat.length} selected
+              QA Rating: {localFilters.csat.length} selected
             </span>
           )}
           {localFilters.channel && localFilters.channel.length > 0 && (
             <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
-              Channel: {localFilters.channel.length} selected
+              Channel: {localFilters.channel.map((c) => (c === 'website' ? 'Website' : c === 'whatsapp' ? 'WhatsApp' : c)).join(', ')}
+            </span>
+          )}
+          {localFilters.humanHandover !== undefined && (
+            <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
+              Human Handover: {localFilters.humanHandover ? 'Yes' : 'No'}
+            </span>
+          )}
+          {localFilters.leadCreated !== undefined && (
+            <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
+              Lead Created: {localFilters.leadCreated === null ? 'No Data' : localFilters.leadCreated ? 'Yes' : 'No'}
+            </span>
+          )}
+          {(localFilters.dateFrom || localFilters.dateTo) && (
+            <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
+              Date: {localFilters.dateFrom || '…'} to {localFilters.dateTo || '…'}
             </span>
           )}
         </div>

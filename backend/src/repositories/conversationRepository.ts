@@ -1,6 +1,8 @@
 import { query } from '../db/connection';
 import { Conversation, Message, ConversationFilters } from '../types';
 
+type QARatingFilterValue = 'good' | 'okay' | 'bad' | null;
+
 // Helper function to map channel
 const mapChannel = (sourceDetails: any): 'website' | 'whatsapp' => {
   const channel = sourceDetails?.channel;
@@ -39,9 +41,99 @@ export const conversationRepository = {
       paramIndex++;
     }
 
+    // CSAT/QA Rating filter - human QA assessments from qa_assessments (Good, Okay, Bad, No Rating)
+    // Requires LEFT JOIN to qa_assessments - will be applied below
+    const csatFilterActive = filters.csat && filters.csat.length > 0;
+    let csatConditions: string[] = [];
+    if (csatFilterActive) {
+      const csatValues = filters.csat! as QARatingFilterValue[];
+      if (csatValues.includes('good')) {
+        csatConditions.push(`(qa.rating = 'good')`);
+      }
+      if (csatValues.includes('okay')) {
+        csatConditions.push(`(qa.rating = 'okay')`);
+      }
+      if (csatValues.includes('bad')) {
+        csatConditions.push(`(qa.rating = 'bad')`);
+      }
+      if (csatValues.includes(null)) {
+        csatConditions.push(`(qa.conversation_id IS NULL)`);
+      }
+      if (csatConditions.length > 0) {
+        whereConditions.push(`(${csatConditions.join(' OR ')})`);
+      }
+    }
+
+    // Date range filters - filter by created_at
+    if (filters.dateFrom) {
+      whereConditions.push(`wc.created_at::date >= $${paramIndex}`);
+      params.push(filters.dateFrom);
+      paramIndex++;
+    }
+    if (filters.dateTo) {
+      whereConditions.push(`wc.created_at::date <= $${paramIndex}`);
+      params.push(filters.dateTo);
+      paramIndex++;
+    }
+
+    // Channel filter - from source_details JSON (aligns with mapChannel: whatsapp explicit, else website)
+    if (filters.channel && filters.channel.length > 0) {
+      const channels = filters.channel.map((c) => c.toLowerCase());
+      const hasWebsite = channels.includes('website');
+      const hasWhatsapp = channels.includes('whatsapp');
+
+      if (hasWebsite && hasWhatsapp) {
+        // Both selected = no channel filter (show all)
+      } else if (hasWhatsapp) {
+        whereConditions.push(`LOWER(TRIM(COALESCE(JSON_EXTRACT_PATH_TEXT(wc.source_details, 'channel'), ''))) = 'whatsapp'`);
+      } else if (hasWebsite) {
+        // Website = whatsapp explicit OR null/empty/other (per mapChannel default)
+        whereConditions.push(`(JSON_EXTRACT_PATH_TEXT(wc.source_details, 'channel') IS NULL OR TRIM(COALESCE(JSON_EXTRACT_PATH_TEXT(wc.source_details, 'channel'), '')) = '' OR LOWER(TRIM(JSON_EXTRACT_PATH_TEXT(wc.source_details, 'channel'))) != 'whatsapp')`);
+      }
+    }
+
+    // Intent filter - from meta or conversation_evaluation
+    if (filters.intent && filters.intent.length > 0) {
+      whereConditions.push(`(
+        JSON_EXTRACT_PATH_TEXT(wc.meta, 'main_intent') IN (${filters.intent.map((_, i) => `$${paramIndex + i}`).join(', ')})
+        OR JSON_EXTRACT_PATH_TEXT(wc.conversation_evaluation, 'main_intent') IN (${filters.intent.map((_, i) => `$${paramIndex + filters.intent!.length + i}`).join(', ')})
+      )`);
+      params.push(...filters.intent, ...filters.intent);
+      paramIndex += filters.intent.length * 2;
+    }
+
+    // Human handover filter - from meta.agent_id presence
+    if (filters.humanHandover === true) {
+      whereConditions.push(`(wc.meta IS NOT NULL AND wc.meta NOT IN ('', 'null') AND wc.meta LIKE '{%' AND JSON_EXTRACT_PATH_TEXT(wc.meta, 'agent_id') IS NOT NULL AND JSON_EXTRACT_PATH_TEXT(wc.meta, 'agent_id') != '')`);
+    } else if (filters.humanHandover === false) {
+      whereConditions.push(`(
+        wc.meta IS NULL OR wc.meta IN ('', 'null') OR wc.meta NOT LIKE '{%'
+        OR JSON_EXTRACT_PATH_TEXT(wc.meta, 'agent_id') IS NULL
+        OR JSON_EXTRACT_PATH_TEXT(wc.meta, 'agent_id') = ''
+      )`);
+    }
+
+    // Lead created filter - from meta.able_to_create_lead
+    if (filters.leadCreated === true) {
+      whereConditions.push(`(wc.meta IS NOT NULL AND wc.meta NOT IN ('', 'null') AND wc.meta LIKE '{%' AND LOWER(JSON_EXTRACT_PATH_TEXT(wc.meta, 'able_to_create_lead')) = 'true')`);
+    } else if (filters.leadCreated === false) {
+      whereConditions.push(`(wc.meta IS NOT NULL AND wc.meta NOT IN ('', 'null') AND wc.meta LIKE '{%' AND LOWER(JSON_EXTRACT_PATH_TEXT(wc.meta, 'able_to_create_lead')) = 'false')`);
+    } else if (filters.leadCreated === null) {
+      whereConditions.push(`(
+        wc.meta IS NULL OR wc.meta IN ('', 'null') OR wc.meta NOT LIKE '{%'
+        OR JSON_EXTRACT_PATH_TEXT(wc.meta, 'able_to_create_lead') IS NULL
+        OR JSON_EXTRACT_PATH_TEXT(wc.meta, 'able_to_create_lead') = ''
+      )`);
+    }
+
     // Build WHERE clause
     const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
     
+    // QA assessments join (needed when filtering by human QA rating)
+    const qaJoin = csatFilterActive
+      ? `LEFT JOIN qa_assessments qa ON wc.conversation_id = qa.conversation_id`
+      : '';
+
     // Sorting
     let orderBy = 'wc.created_at DESC'; // Default
     if (sortBy === 'oldest') orderBy = 'wc.created_at ASC';
@@ -51,6 +143,7 @@ export const conversationRepository = {
     const countQuery = `
       SELECT COUNT(DISTINCT wc.conversation_id) as total
       FROM whatsapp_conversations wc
+      ${qaJoin}
       ${whereClause}
     `;
     
@@ -88,6 +181,7 @@ export const conversationRepository = {
         COUNT(wm.id) as message_count
       FROM whatsapp_conversations wc
       LEFT JOIN whatsapp_messages wm ON wc.conversation_id = wm.conversation_id
+      ${qaJoin}
       ${whereClause}
       GROUP BY wc.conversation_id, wc.created_at, wc.last_message_at, 
                wc.source_details, wc.conversation_evaluation, wc.meta,
@@ -266,6 +360,7 @@ export const conversationRepository = {
     return {
       csatOptions: [
         { value: 'good', label: 'Good' },
+        { value: 'okay', label: 'Okay' },
         { value: 'bad', label: 'Bad' },
         { value: null, label: 'No Rating' }
       ],

@@ -6,50 +6,21 @@ interface QuickFilterChipsProps {
 }
 
 export const QuickFilterChips = ({ filters, onFiltersChange }: QuickFilterChipsProps) => {
-  const getDateRange = (range: 'today' | 'week' | 'month') => {
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    
-    switch (range) {
-      case 'today':
-        return { dateFrom: today.toISOString().split('T')[0] };
-      case 'week':
-        const weekAgo = new Date(today);
-        weekAgo.setDate(weekAgo.getDate() - 7);
-        return { dateFrom: weekAgo.toISOString().split('T')[0] };
-      case 'month':
-        const monthAgo = new Date(today);
-        monthAgo.setMonth(monthAgo.getMonth() - 1);
-        return { dateFrom: monthAgo.toISOString().split('T')[0] };
-    }
-  };
-
   const handleQuickFilter = (filterType: string) => {
     let newFilters = { ...filters };
 
     switch (filterType) {
       case 'unassessed':
-        // Filter for conversations without QA rating
-        // This would need backend support or client-side filtering
+        newFilters = { ...newFilters, csat: [null] };
         break;
       case 'needs_review':
-        newFilters = {
-          ...newFilters,
-          csat: ['bad'],
-        };
-        break;
-      case 'today':
-      case 'week':
-      case 'month':
-        const dateRange = getDateRange(filterType as 'today' | 'week' | 'month');
-        newFilters = {
-          ...newFilters,
-          ...dateRange,
-        };
+        newFilters = { ...newFilters, csat: ['bad'] };
         break;
       case 'clear':
         newFilters = {};
         break;
+      default:
+        return;
     }
 
     onFiltersChange(newFilters);
@@ -57,12 +28,10 @@ export const QuickFilterChips = ({ filters, onFiltersChange }: QuickFilterChipsP
 
   const isActive = (filterType: string) => {
     switch (filterType) {
+      case 'unassessed':
+        return filters.csat?.includes(null) && (!filters.csat || filters.csat.length === 1);
       case 'needs_review':
-        return filters.csat?.includes('bad');
-      case 'today':
-      case 'week':
-      case 'month':
-        return !!filters.dateFrom;
+        return filters.csat?.includes('bad') && (!filters.csat || filters.csat.length === 1);
       default:
         return false;
     }
@@ -79,25 +48,7 @@ export const QuickFilterChips = ({ filters, onFiltersChange }: QuickFilterChipsP
       id: 'needs_review',
       label: 'Needs Review',
       icon: '⚠️',
-      description: 'Bad CSAT or Escalated',
-    },
-    {
-      id: 'today',
-      label: 'Today',
-      icon: '📅',
-      description: 'Today\'s conversations',
-    },
-    {
-      id: 'week',
-      label: 'This Week',
-      icon: '📆',
-      description: 'Last 7 days',
-    },
-    {
-      id: 'month',
-      label: 'This Month',
-      icon: '🗓️',
-      description: 'Last 30 days',
+      description: 'Bad rating',
     },
   ];
 
