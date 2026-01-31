@@ -270,14 +270,14 @@ export const ConversationExplorer = () => {
             <p className="text-red-600 text-sm mb-2">
               {error.message || 'Failed to connect to backend server'}
             </p>
-            <p className="text-red-600 text-sm">
+            <div className="text-red-600 text-sm">
               Please check:
               <ul className="list-disc list-inside mt-1">
                 <li>Backend server is running and accessible</li>
                 <li>Check browser console for more details</li>
                 <li>Verify API URL configuration</li>
               </ul>
-            </p>
+            </div>
             <button
               onClick={() => window.location.reload()}
               className="mt-3 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"

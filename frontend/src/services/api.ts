@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 // @ts-ignore - Vite env types
-const API_URL = import.meta.env?.VITE_API_URL || 'http://34.254.66.140:5000/api';
+// Default /api uses Vite dev proxy to localhost:5000; set VITE_API_URL for production or direct backend.
+const API_URL = import.meta.env?.VITE_API_URL ?? '/api';
 
 const apiClient = axios.create({
   baseURL: API_URL,

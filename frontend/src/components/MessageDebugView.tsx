@@ -31,25 +31,31 @@ export const MessageDebugView = ({ message }: MessageDebugViewProps) => {
     return null;
   }
 
-  const handleClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (langsmithUrl) {
-      window.open(langsmithUrl, '_blank', 'noopener,noreferrer');
-    }
-  };
-
   return (
     <div className="mt-2 pt-2 border-t border-gray-200">
-      <button
-        onClick={handleClick}
-        disabled={!langsmithUrl}
-        className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        title={langsmithUrl ? 'View trace in LangSmith' : 'Loading LangSmith URL...'}
-      >
-        <span className="text-gray-500">Trace ID:</span>
-        <span className="font-mono">{message.langsmithTraceId.substring(0, 8)}...</span>
-        <span className="text-blue-600">↗</span>
-      </button>
+      {langsmithUrl ? (
+        <a
+          href={langsmithUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          className="text-xs text-blue-600 hover:text-blue-800 hover:underline inline-flex items-center gap-1 transition-colors"
+          title="View trace in LangSmith (opens in new tab)"
+        >
+          <span className="text-gray-500">Trace ID:</span>
+          <span className="font-mono">{message.langsmithTraceId.substring(0, 8)}...</span>
+          <span className="text-blue-600">↗</span>
+        </a>
+      ) : (
+        <span
+          className="text-xs text-gray-400 inline-flex items-center gap-1"
+          title="Loading LangSmith URL..."
+        >
+          <span className="text-gray-500">Trace ID:</span>
+          <span className="font-mono">{message.langsmithTraceId.substring(0, 8)}...</span>
+          <span className="animate-pulse">…</span>
+        </span>
+      )}
     </div>
   );
 };

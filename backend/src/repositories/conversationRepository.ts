@@ -324,7 +324,8 @@ export const conversationRepository = {
           agent_id,
           from_number,
           to_number,
-          status
+          status,
+          trace_id
         FROM whatsapp_messages 
         WHERE conversation_id = $1 
         ORDER BY created_at ASC
@@ -342,7 +343,7 @@ export const conversationRepository = {
         messageType: msgRow.message_type || 'text',
         intent: null, // Simplified
         processingLatency: null,
-        langsmithTraceId: null,
+        langsmithTraceId: msgRow.trace_id || null,
         promptUsed: null,
         ragContext: null,
         modelOutput: null,

@@ -4,17 +4,20 @@ import { logger } from '../utils/logger';
 
 const router = Router();
 
-// Helper function to generate LangSmith URL from trace ID
+// LangSmith "peek trace" format: project URL + peek/peeked_trace query params.
+// Use a long time range so the trace is in scope (blank often = trace outside current range).
 const getLangSmithUrl = (traceId: string | null): string | null => {
-  if (!traceId) return null;
-  
-  // LangSmith URL format: https://smith.langchain.com/o/{org}/projects/{project}/r/{runId}
-  // For now, using a generic format. Adjust based on your LangSmith setup
-  // You may need to extract org/project from environment variables
+  const id = traceId?.trim();
+  if (!id) return null;
+
   const org = process.env.LANGSMITH_ORG || 'demo';
   const project = process.env.LANGSMITH_PROJECT || 'demo';
-  
-  return `https://smith.langchain.com/o/${org}/projects/${project}/r/${traceId}`;
+  const encoded = encodeURIComponent(id);
+  // Duration: 90d so older traces are in scope (set LANGSMITH_DURATION=7d, 30d, 90d if needed).
+  const duration = process.env.LANGSMITH_DURATION || '90d';
+  const timeModel = encodeURIComponent(JSON.stringify({ duration }));
+
+  return `https://smith.langchain.com/o/${org}/projects/${project}?timeModel=${timeModel}&peek=${encoded}&peeked_trace=${encoded}`;
 };
 
 // GET /api/messages/:id/debug - Get debug info for a message
