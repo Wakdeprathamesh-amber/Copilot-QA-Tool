@@ -28,6 +28,12 @@ export interface Conversation {
   messageCount?: number;
   lastMessageTime?: Date | null;
   leadCreated?: boolean | null; // Extracted from meta.able_to_create_lead
+  /** SalesIQ conversation URL (built from salesiq_conversation_id) */
+  salesiqConversationUrl?: string | null;
+  /** CRM lead URL (built from lead_id) */
+  leadUrl?: string | null;
+  /** Zoho Desk ticket URL (built from zoho_ticket_id) */
+  zohoDeskTicketUrl?: string | null;
 }
 
 export interface Message {

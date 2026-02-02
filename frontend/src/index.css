@@ -10,3 +10,25 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* Rendered AI message HTML inside bubbles */
+.message-content div,
+.message-content p {
+  margin: 0 0 0.5rem 0;
+}
+.message-content p:last-child,
+.message-content div:last-child p:last-child {
+  margin-bottom: 0;
+}
+.message-content h1, .message-content h2, .message-content h3, .message-content h4 {
+  margin: 0.5rem 0 0.25rem 0;
+  font-weight: 600;
+}
+.message-content ul, .message-content ol {
+  margin: 0.25rem 0;
+  padding-left: 1.25rem;
+}
+.message-content a {
+  color: inherit;
+  text-decoration: underline;
+}

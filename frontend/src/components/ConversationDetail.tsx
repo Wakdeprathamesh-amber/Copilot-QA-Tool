@@ -67,6 +67,40 @@ export const ConversationDetail = () => {
             <div className="bg-white rounded-lg border border-gray-200 p-6">
               <div className="mb-4 pb-4 border-b">
                 <h2 className="text-lg font-semibold text-gray-900 mb-2">Conversation</h2>
+                {(conversation.salesiqConversationUrl || conversation.leadUrl || conversation.zohoDeskTicketUrl) && (
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {conversation.salesiqConversationUrl && (
+                      <a
+                        href={conversation.salesiqConversationUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100"
+                      >
+                        SalesIQ →
+                      </a>
+                    )}
+                    {conversation.leadUrl && (
+                      <a
+                        href={conversation.leadUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-green-700 bg-green-50 border border-green-200 rounded-md hover:bg-green-100"
+                      >
+                        CRM Lead →
+                      </a>
+                    )}
+                    {conversation.zohoDeskTicketUrl && (
+                      <a
+                        href={conversation.zohoDeskTicketUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded-md hover:bg-amber-100"
+                      >
+                        Zoho Desk →
+                      </a>
+                    )}
+                  </div>
+                )}
                 {conversation.autoSummary && (
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                     <p className="text-sm text-blue-900">

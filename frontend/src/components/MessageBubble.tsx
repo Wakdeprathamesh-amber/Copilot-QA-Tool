@@ -1,6 +1,7 @@
 import { Message } from '../services/api';
 import { format } from 'date-fns';
 import { MessageDebugView } from './MessageDebugView';
+import { parseMessageContent } from '../utils/messageContent';
 
 interface MessageBubbleProps {
   message: Message;
@@ -10,6 +11,8 @@ export const MessageBubble = ({ message }: MessageBubbleProps) => {
   const isUser = message.sender === 'user';
   const isAI = message.sender === 'ai';
   const isHuman = message.sender === 'human';
+
+  const parsed = parseMessageContent(message.content);
 
   const getBubbleStyles = () => {
     if (isUser) {
@@ -43,8 +46,12 @@ export const MessageBubble = ({ message }: MessageBubbleProps) => {
             {format(new Date(message.timestamp), 'HH:mm')}
           </span>
         </div>
-        <div className="text-sm whitespace-pre-wrap break-words">
-          {message.content}
+        <div className="text-sm whitespace-pre-wrap break-words message-content">
+          {parsed.kind === 'html' ? (
+            <div dangerouslySetInnerHTML={{ __html: parsed.value }} />
+          ) : (
+            parsed.value
+          )}
         </div>
         {message.intent && (
           <div className="text-xs opacity-75 mt-1 italic">

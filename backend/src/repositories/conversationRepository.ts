@@ -20,6 +20,19 @@ const mapCSAT = (evaluation: any): 'good' | 'bad' | null => {
   return null; // 3 is neutral
 };
 
+// URL bases for external links (SalesIQ, CRM lead, Zoho Desk)
+const SALESIQ_BASE = 'https://salesiq.zoho.com/amber_student/mychats';
+const LEAD_BASE = 'https://amberstudent.com/dashboard/leads';
+const ZOHO_DESK_BASE = 'https://desk.zoho.com/agent/amberstudent1/amberstudent/tickets/details';
+
+function buildLinkUrls(row: { salesiq_conversation_id?: string | null; lead_id?: string | null; zoho_ticket_id?: string | null }) {
+  return {
+    salesiqConversationUrl: row.salesiq_conversation_id ? `${SALESIQ_BASE}/${row.salesiq_conversation_id}` : null,
+    leadUrl: row.lead_id ? `${LEAD_BASE}/${row.lead_id}` : null,
+    zohoDeskTicketUrl: row.zoho_ticket_id ? `${ZOHO_DESK_BASE}/${row.zoho_ticket_id}` : null,
+  };
+}
+
 // Simple in-memory cache for total count
 let totalCountCache: { count: number; timestamp: number; filters: string } | null = null;
 const CACHE_TTL = 60000; // 60 seconds
@@ -178,6 +191,9 @@ export const conversationRepository = {
         wc.phone_number,
         wc.email,
         wc.user_id,
+        wc.salesiq_conversation_id,
+        wc.lead_id,
+        wc.zoho_ticket_id,
         COUNT(wm.id) as message_count
       FROM whatsapp_conversations wc
       LEFT JOIN whatsapp_messages wm ON wc.conversation_id = wm.conversation_id
@@ -185,7 +201,8 @@ export const conversationRepository = {
       ${whereClause}
       GROUP BY wc.conversation_id, wc.created_at, wc.last_message_at, 
                wc.source_details, wc.conversation_evaluation, wc.meta,
-               wc.automation_enabled, wc.phone_number, wc.email, wc.user_id
+               wc.automation_enabled, wc.phone_number, wc.email, wc.user_id,
+               wc.salesiq_conversation_id, wc.lead_id, wc.zoho_ticket_id
       ORDER BY ${orderBy}
       LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
     `;
@@ -230,7 +247,8 @@ export const conversationRepository = {
         updatedAt: row.last_message_at || row.created_at,
         messageCount: parseInt(row.message_count) || 0,
         lastMessageTime: row.last_message_at,
-        leadCreated: (meta as any).able_to_create_lead === true || (meta as any).able_to_create_lead === 'true'
+        leadCreated: (meta as any).able_to_create_lead === true || (meta as any).able_to_create_lead === 'true',
+        ...buildLinkUrls(row)
       };
     });
 
@@ -256,13 +274,17 @@ export const conversationRepository = {
         wc.phone_number,
         wc.email,
         wc.user_id,
+        wc.salesiq_conversation_id,
+        wc.lead_id,
+        wc.zoho_ticket_id,
         COUNT(wm.id) as message_count
       FROM whatsapp_conversations wc
       LEFT JOIN whatsapp_messages wm ON wc.conversation_id = wm.conversation_id
       WHERE wc.conversation_id = $1
       GROUP BY wc.conversation_id, wc.created_at, wc.last_message_at, 
                wc.source_details, wc.conversation_evaluation, wc.meta,
-               wc.automation_enabled, wc.phone_number, wc.email, wc.user_id
+               wc.automation_enabled, wc.phone_number, wc.email, wc.user_id,
+               wc.salesiq_conversation_id, wc.lead_id, wc.zoho_ticket_id
     `;
 
     const result = await query(conversationQuery, [id]);
@@ -309,7 +331,8 @@ export const conversationRepository = {
       updatedAt: row.last_message_at || row.created_at,
       messageCount: parseInt(row.message_count) || 0,
       lastMessageTime: row.last_message_at,
-      leadCreated: (meta as any).able_to_create_lead === true || (meta as any).able_to_create_lead === 'true'
+      leadCreated: (meta as any).able_to_create_lead === true || (meta as any).able_to_create_lead === 'true',
+      ...buildLinkUrls(row)
     };
 
     if (includeMessages) {

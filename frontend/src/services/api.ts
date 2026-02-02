@@ -50,6 +50,12 @@ export interface Conversation {
   messageCount?: number;
   lastMessageTime?: string | null;
   leadCreated?: boolean | null; // Extracted from meta.able_to_create_lead
+  /** SalesIQ conversation URL */
+  salesiqConversationUrl?: string | null;
+  /** CRM lead URL (Amber dashboard) */
+  leadUrl?: string | null;
+  /** Zoho Desk ticket URL */
+  zohoDeskTicketUrl?: string | null;
 }
 
 export interface QAAssessment {
