@@ -1,8 +1,10 @@
 import { Router, Request, Response } from 'express';
+import { authenticate } from '../middleware/auth';
 import { qaAssessmentRepository } from '../repositories/qaAssessmentRepository';
 import { logger } from '../utils/logger';
 
 const router = Router();
+router.use(authenticate);
 
 // POST /api/qa-assessments/bulk - Bulk fetch QA assessments
 router.post('/bulk', async (req: Request, res: Response) => {

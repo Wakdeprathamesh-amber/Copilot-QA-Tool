@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { ConversationExplorer } from './components/ConversationExplorer';
 import { ConversationDetail } from './components/ConversationDetail';
+import { LoginPage } from './components/LoginPage';
+import { RequireAuth } from './components/RequireAuth';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -17,8 +19,23 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<ConversationExplorer />} />
-          <Route path="/conversations/:id" element={<ConversationDetail />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route
+            path="/"
+            element={
+              <RequireAuth>
+                <ConversationExplorer />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/conversations/:id"
+            element={
+              <RequireAuth>
+                <ConversationDetail />
+              </RequireAuth>
+            }
+          />
         </Routes>
       </BrowserRouter>
     </QueryClientProvider>

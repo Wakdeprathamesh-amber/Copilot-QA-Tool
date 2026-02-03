@@ -40,11 +40,13 @@ app.get('/health', async (req, res) => {
   }
 });
 
-// API routes
+// API routes (auth is public; data routes require JWT)
+import authRoutes from './routes/auth';
 import conversationRoutes from './routes/conversations';
 import messageRoutes from './routes/messages';
 import qaAssessmentRoutes from './routes/qaAssessments';
 
+app.use('/api/auth', authRoutes);
 app.use('/api/conversations', conversationRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/qa-assessments', qaAssessmentRoutes);

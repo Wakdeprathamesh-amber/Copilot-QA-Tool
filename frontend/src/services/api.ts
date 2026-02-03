@@ -114,6 +114,23 @@ export interface FilterOptions {
   leadCreatedOptions?: Array<{ value: boolean | null; label: string }>;
 }
 
+export interface AuthUser {
+  id: string;
+  email: string;
+  role?: string;
+}
+
+export const authApi = {
+  login: async (email: string, password: string): Promise<{ token: string; user: AuthUser }> => {
+    const res = await apiClient.post('/auth/login', { email, password });
+    return res.data as { token: string; user: AuthUser };
+  },
+  me: async (): Promise<{ user: AuthUser }> => {
+    const res = await apiClient.get('/auth/me');
+    return res.data as { user: AuthUser };
+  },
+};
+
 export const api = {
   conversations: {
     list: async (filters: ConversationFilters = {}, page: number = 1, pageSize: number = 50, search?: string, sortBy?: string): Promise<ConversationListResponse> => {

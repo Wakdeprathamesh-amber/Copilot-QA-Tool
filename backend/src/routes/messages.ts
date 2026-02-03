@@ -1,20 +1,27 @@
 import { Router, Request, Response } from 'express';
 import { query } from '../db/connection';
+import { authenticate } from '../middleware/auth';
 import { logger } from '../utils/logger';
 
 const router = Router();
+router.use(authenticate);
 
-// LangSmith "peek trace" format: project URL + peek/peeked_trace query params.
-// Use a long time range so the trace is in scope (blank often = trace outside current range).
 const getLangSmithUrl = (traceId: string | null): string | null => {
   const id = traceId?.trim();
   if (!id) return null;
 
-  const org = process.env.LANGSMITH_ORG || 'demo';
-  const project = process.env.LANGSMITH_PROJECT || 'demo';
+  // Require proper configuration instead of falling back to "demo" values.
+  const org = process.env.LANGSMITH_ORG;
+  const project = process.env.LANGSMITH_PROJECT;
+
+  // If not configured, don't generate a broken URL.
+  if (!org || !project) {
+    return null;
+  }
+
   const encoded = encodeURIComponent(id);
-  // Duration: 90d so older traces are in scope (set LANGSMITH_DURATION=7d, 30d, 90d if needed).
-  const duration = process.env.LANGSMITH_DURATION || '90d';
+  // Duration defaults to 7d to match typical LangSmith UI links; override via LANGSMITH_DURATION if needed.
+  const duration = process.env.LANGSMITH_DURATION || '7d';
   const timeModel = encodeURIComponent(JSON.stringify({ duration }));
 
   return `https://smith.langchain.com/o/${org}/projects/${project}?timeModel=${timeModel}&peek=${encoded}&peeked_trace=${encoded}`;

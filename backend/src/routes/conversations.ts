@@ -1,9 +1,11 @@
 import { Router, Request, Response } from 'express';
+import { authenticate } from '../middleware/auth';
 import { conversationRepository } from '../repositories/conversationRepository';
 import { ConversationFilters } from '../types';
 import { logger } from '../utils/logger';
 
 const router = Router();
+router.use(authenticate);
 
 // GET /api/conversations - List conversations with filters
 router.get('/', async (req: Request, res: Response) => {
