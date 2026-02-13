@@ -24,6 +24,12 @@ router.get('/', async (req: Request, res: Response) => {
       filters.csat = csatArray.map(c => c === 'null' ? null : c as 'good' | 'okay' | 'bad');
     }
 
+    // Student CSAT filter (from whatsapp_conversations.meta.feedback.value: positive, negative, no_feedback)
+    if (req.query.studentCsat) {
+      const studentArray = Array.isArray(req.query.studentCsat) ? req.query.studentCsat : [req.query.studentCsat];
+      filters.studentCsat = studentArray as ('positive' | 'negative' | 'no_feedback')[];
+    }
+
     // Channel filter
     if (req.query.channel) {
       const channelArray = Array.isArray(req.query.channel) ? req.query.channel : [req.query.channel];
@@ -58,6 +64,11 @@ router.get('/', async (req: Request, res: Response) => {
       } else if (leadCreatedValue === 'null') {
         filters.leadCreated = null;
       }
+    }
+
+    // Needs human filter (from conversation_intent.needs_human)
+    if (req.query.needsHuman !== undefined) {
+      filters.needsHuman = req.query.needsHuman === 'true';
     }
 
     const result = await conversationRepository.list(filters, page, pageSize, search, sortBy);

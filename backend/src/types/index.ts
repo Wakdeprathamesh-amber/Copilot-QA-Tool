@@ -3,6 +3,7 @@
 export type Channel = 'website' | 'whatsapp';
 export type Outcome = 'qualified' | 'dropped' | 'escalated' | 'ongoing';
 export type CSAT = 'good' | 'bad' | null;
+export type StudentCSAT = 'positive' | 'negative' | 'no_feedback';
 export type MessageSender = 'user' | 'ai' | 'human';
 export type MessageType = 'text' | 'image' | 'file' | 'system';
 export type QARating = 'good' | 'okay' | 'bad';
@@ -18,6 +19,8 @@ export interface Conversation {
   promptVersion: string;
   kbVersion: string;
   detectedIntent: string | null;
+  /** From conversation_intent JSON - whether intent classification flagged needs_human */
+  needsHuman?: boolean | null;
   outcome: Outcome;
   csat: CSAT;
   humanHandover: boolean;
@@ -28,6 +31,8 @@ export interface Conversation {
   messageCount?: number;
   lastMessageTime?: Date | null;
   leadCreated?: boolean | null; // Extracted from meta.able_to_create_lead
+  /** Student CSAT derived from whatsapp_conversations.meta.feedback.value */
+  studentCsat?: StudentCSAT;
   /** SalesIQ conversation URL (built from salesiq_conversation_id) */
   salesiqConversationUrl?: string | null;
   /** CRM lead URL (built from lead_id) */
@@ -43,7 +48,9 @@ export interface Message {
   content: string;
   timestamp: Date;
   messageType: MessageType;
-  intent: string | null; // Message-level intent
+  intent: string | string[] | null; // Message-level intent (may be a single value or list)
+  /** Flattened, human-readable representation of message-level sub_intent JSON */
+  subIntent?: string | null;
   processingLatency: number | null;
   langsmithTraceId: string | null;
   promptUsed: string | null;
@@ -89,4 +96,8 @@ export interface ConversationFilters {
   dateTo?: string;
   humanHandover?: boolean;
   leadCreated?: boolean | null; // Filter by whether lead was created (from meta.able_to_create_lead)
+  /** From conversation_intent.needs_human - filter by intent-level needs human flag */
+  needsHuman?: boolean;
+   /** Student CSAT filter derived from meta.feedback.value */
+  studentCsat?: StudentCSAT[];
 }

@@ -33,7 +33,8 @@ export const useConversation = (id: string, includeMessages: boolean = false) =>
 
 export const useFilterOptions = () => {
   return useQuery('filterOptions', () => api.conversations.getFilterOptions(), {
-    staleTime: 300000, // 5 minutes
+    staleTime: 60000, // 1 minute
+    refetchOnMount: 'always', // Always fetch fresh options when filters panel mounts
   });
 };
 

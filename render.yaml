@@ -36,6 +36,7 @@ services:
     autoDeploy: true
 
   # Frontend Static Site (Recommended - Fastest & Cheapest)
+  # After deploy: add a Rewrite rule in Dashboard → Redirects/Rewrites: Source /* → Destination /index.html (for SPA routes like /login)
   - type: staticSite
     name: qa-tool-frontend
     buildCommand: cd frontend && npm install && npm run build

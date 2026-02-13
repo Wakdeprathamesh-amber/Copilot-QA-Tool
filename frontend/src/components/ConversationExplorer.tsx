@@ -22,11 +22,9 @@ export const ConversationExplorer = () => {
     try {
       if (typeof window !== 'undefined' && window.localStorage) {
         const saved = localStorage.getItem('conversationSort');
-        if (saved && ['newest', 'oldest', 'most_messages', 'least_messages', 'longest_duration', 'shortest_duration', 'highest_csat', 'lowest_csat', 'recently_assessed', 'unassessed_first'].includes(saved)) {
-          return saved as SortOption;
-        }
+        if (saved === 'oldest' || saved === 'newest') return saved;
       }
-    } catch (error) {
+    } catch {
       // Failed to load sort preference - use default
     }
     return 'newest';
@@ -112,7 +110,7 @@ export const ConversationExplorer = () => {
     ) || [];
 
     // Convert to CSV
-    const headers = ['ID', 'Channel', 'Start Time', 'End Time', 'CSAT', 'Outcome', 'Intent', 'Message Count', 'Duration'];
+    const headers = ['ID', 'Channel', 'Start Time', 'End Time', 'CSAT', 'Outcome', 'Conversation intent', 'Needs human', 'Message Count', 'Duration'];
     const rows = conversationsToExport.map(c => {
       const duration = c.endTime 
         ? `${Math.round((new Date(c.endTime).getTime() - new Date(c.startTime).getTime()) / 60000)}m`
@@ -125,6 +123,7 @@ export const ConversationExplorer = () => {
         c.csat || '',
         c.outcome,
         c.detectedIntent || '',
+        c.needsHuman === true ? 'Yes' : c.needsHuman === false ? 'No' : '',
         c.messageCount || 0,
         duration,
       ];

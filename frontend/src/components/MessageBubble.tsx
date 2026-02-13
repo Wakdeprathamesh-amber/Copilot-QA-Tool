@@ -58,6 +58,11 @@ export const MessageBubble = ({ message }: MessageBubbleProps) => {
             Intent: {Array.isArray(message.intent) ? message.intent.join(', ') : message.intent}
           </div>
         )}
+        {message.subIntent && (
+          <div className="text-xs opacity-75 mt-0.5 italic">
+            Sub-intent: {message.subIntent}
+          </div>
+        )}
         {/* Only show latency if available - not showing null/undefined values */}
         {message.processingLatency !== null && message.processingLatency !== undefined && (
           <div className="text-xs opacity-60 mt-1">

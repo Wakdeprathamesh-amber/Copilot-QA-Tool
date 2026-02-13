@@ -45,7 +45,7 @@ export const ConversationFiltersComponent = ({ filters, onFiltersChange }: Conve
     // Don't apply immediately - wait for Apply button
   };
 
-  const toggleArrayFilter = (key: 'csat' | 'intent' | 'channel', value: any) => {
+  const toggleArrayFilter = (key: 'csat' | 'intent' | 'channel' | 'studentCsat', value: any) => {
     const current = localFilters[key] || [];
     const array = Array.isArray(current) ? current : [current];
     const newArray = array.includes(value)
@@ -112,6 +112,23 @@ export const ConversationFiltersComponent = ({ filters, onFiltersChange }: Conve
       </div>
 
       <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ${isExpanded ? '' : 'hidden'}`}>
+        {/* Needs Human Filter (from conversation_intent.needs_human) - placed first for visibility */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Needs Human (Intent)</label>
+          <select
+            value={localFilters.needsHuman === undefined ? '' : localFilters.needsHuman.toString()}
+            onChange={(e) => {
+              const value = e.target.value === '' ? undefined : e.target.value === 'true';
+              updateFilter('needsHuman', value);
+            }}
+            className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+          >
+            <option value="">All</option>
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+          </select>
+        </div>
+
         {/* QA Rating Filter (human assessments from QA tool) */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">QA Rating</label>
@@ -129,6 +146,26 @@ export const ConversationFiltersComponent = ({ filters, onFiltersChange }: Conve
             ))}
           </div>
         </div>
+
+        {/* Student CSAT Filter (from student feedback in meta.feedback.value) */}
+        {filterOptions?.studentCsatOptions && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Student CSAT</label>
+            <div className="space-y-2">
+              {filterOptions.studentCsatOptions.map((option) => (
+                <label key={option.value} className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={(localFilters.studentCsat || []).includes(option.value)}
+                    onChange={() => toggleArrayFilter('studentCsat', option.value)}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="ml-2 text-sm text-gray-700">{option.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Channel Filter */}
         <div>
@@ -148,10 +185,10 @@ export const ConversationFiltersComponent = ({ filters, onFiltersChange }: Conve
           </div>
         </div>
 
-        {/* Intent Filter */}
+        {/* Conversation intent Filter - from whatsapp_conversations.conversation_intent */}
         {filterOptions?.intentOptions && filterOptions.intentOptions.length > 0 && (
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Intent</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Conversation intent</label>
             <select
               multiple
               value={localFilters.intent || []}
@@ -253,6 +290,11 @@ export const ConversationFiltersComponent = ({ filters, onFiltersChange }: Conve
               Channel: {localFilters.channel.map((c) => (c === 'website' ? 'Website' : c === 'whatsapp' ? 'WhatsApp' : c)).join(', ')}
             </span>
           )}
+          {localFilters.studentCsat && localFilters.studentCsat.length > 0 && (
+            <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
+              Student CSAT: {localFilters.studentCsat.length} selected
+            </span>
+          )}
           {localFilters.humanHandover !== undefined && (
             <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
               Human Handover: {localFilters.humanHandover ? 'Yes' : 'No'}
@@ -261,6 +303,16 @@ export const ConversationFiltersComponent = ({ filters, onFiltersChange }: Conve
           {localFilters.leadCreated !== undefined && (
             <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
               Lead Created: {localFilters.leadCreated === null ? 'No Data' : localFilters.leadCreated ? 'Yes' : 'No'}
+            </span>
+          )}
+          {localFilters.intent && localFilters.intent.length > 0 && (
+            <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
+              Conversation intent: {localFilters.intent.join(', ')}
+            </span>
+          )}
+          {localFilters.needsHuman !== undefined && (
+            <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
+              Needs Human: {localFilters.needsHuman ? 'Yes' : 'No'}
             </span>
           )}
           {(localFilters.dateFrom || localFilters.dateTo) && (

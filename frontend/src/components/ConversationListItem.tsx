@@ -73,6 +73,30 @@ export const ConversationListItem = ({ conversation, qaAssessment, onClick, onRa
     return null;
   };
 
+  const getStudentCSATBadge = () => {
+    if (!conversation.studentCsat) return null;
+    if (conversation.studentCsat === 'positive') {
+      return (
+        <span className="px-2 py-1 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-800">
+          Student Positive
+        </span>
+      );
+    }
+    if (conversation.studentCsat === 'negative') {
+      return (
+        <span className="px-2 py-1 text-xs font-semibold rounded-full bg-rose-100 text-rose-800">
+          Student Negative
+        </span>
+      );
+    }
+    // no_feedback
+    return (
+      <span className="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-700">
+        No Student Feedback
+      </span>
+    );
+  };
+
   const getChannelBadge = () => {
     const channelLabel = conversation.channel === 'whatsapp' ? 'WhatsApp' : 'Website';
     return (
@@ -243,6 +267,7 @@ export const ConversationListItem = ({ conversation, qaAssessment, onClick, onRa
             {getOutcomeBadge()}
             {getLeadCreatedBadge()}
             {getCSATBadge()}
+            {getStudentCSATBadge()}
             {getQARatingBadge()}
             {qaStatus?.hasNotes && (
               <span className="px-2 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">
@@ -268,7 +293,10 @@ export const ConversationListItem = ({ conversation, qaAssessment, onClick, onRa
           {/* Enhanced Metadata Row */}
           <div className="flex items-center gap-4 text-xs text-gray-500 flex-wrap">
             {conversation.detectedIntent && (
-              <span>Intent: <span className="font-medium">{conversation.detectedIntent}</span></span>
+              <span>Conversation intent: <span className="font-medium">{conversation.detectedIntent}</span></span>
+            )}
+            {conversation.needsHuman !== undefined && conversation.needsHuman !== null && (
+              <span>Needs human: <span className="font-medium">{conversation.needsHuman ? 'Yes' : 'No'}</span></span>
             )}
             
             {/* Message Count */}

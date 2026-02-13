@@ -94,9 +94,23 @@ Open your frontend URL in a browser. You should see the QA Tool interface.
 - Verify all environment variables are set
 - Ensure `DB_PASSWORD` is set as Secret (not plain text)
 
-### Frontend can't connect
+### Frontend shows 404 (Not Found)
 
-- Verify `VITE_API_URL` includes `/api` at the end
+The app uses client-side routing (`/`, `/login`, `/conversations/:id`). The static server only has `index.html` at `/`, so direct requests to `/login` or any other route return 404. Fix it with a **rewrite rule** on Render:
+
+1. In [Render Dashboard](https://dashboard.render.com), open your **frontend static site** (e.g. `qa-tool-frontend`).
+2. Go to **Settings** → **Redirects/Rewrites** (or **Redirect Rules**).
+3. Add a **Rewrite** (not Redirect) rule:
+   - **Source:** `/*`
+   - **Destination:** `/index.html`
+   - **Action:** Rewrite
+4. Save. No redeploy needed—rules apply immediately.
+
+After this, any path (e.g. `/login`, `/conversations/123`) will serve `index.html` and React Router will handle the route.
+
+### Frontend can't connect to backend
+
+- Verify `VITE_API_URL` includes `/api` at the end (e.g. `https://qa-tool-backend.onrender.com/api`)
 - Check backend URL is correct
 - Rebuild frontend after changing `VITE_API_URL`
 

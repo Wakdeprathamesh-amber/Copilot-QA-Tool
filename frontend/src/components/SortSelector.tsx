@@ -1,16 +1,7 @@
 import { useState } from 'react';
 
-export type SortOption = 
-  | 'newest'
-  | 'oldest'
-  | 'most_messages'
-  | 'least_messages'
-  | 'longest_duration'
-  | 'shortest_duration'
-  | 'highest_csat'
-  | 'lowest_csat'
-  | 'recently_assessed'
-  | 'unassessed_first';
+// Backend only supports newest and oldest; other sorts are not implemented
+export type SortOption = 'newest' | 'oldest';
 
 export interface SortOptionConfig {
   value: SortOption;
@@ -21,14 +12,6 @@ export interface SortOptionConfig {
 const sortOptions: SortOptionConfig[] = [
   { value: 'newest', label: 'Newest First', icon: '⬇️' },
   { value: 'oldest', label: 'Oldest First', icon: '⬆️' },
-  { value: 'most_messages', label: 'Most Messages', icon: '💬' },
-  { value: 'least_messages', label: 'Least Messages', icon: '💭' },
-  { value: 'longest_duration', label: 'Longest Duration', icon: '⏱️' },
-  { value: 'shortest_duration', label: 'Shortest Duration', icon: '⚡' },
-  { value: 'highest_csat', label: 'Highest CSAT', icon: '⭐' },
-  { value: 'lowest_csat', label: 'Lowest CSAT', icon: '📉' },
-  { value: 'recently_assessed', label: 'Recently Assessed', icon: '✅' },
-  { value: 'unassessed_first', label: 'Unassessed First', icon: '❓' },
 ];
 
 interface SortSelectorProps {

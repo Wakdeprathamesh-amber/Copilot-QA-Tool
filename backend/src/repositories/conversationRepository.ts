@@ -1,5 +1,6 @@
 import { query } from '../db/connection';
-import { Conversation, Message, ConversationFilters } from '../types';
+import { Conversation, Message, ConversationFilters, StudentCSAT } from '../types';
+import { logger } from '../utils/logger';
 
 type QARatingFilterValue = 'good' | 'okay' | 'bad' | null;
 
@@ -10,7 +11,36 @@ const mapChannel = (sourceDetails: any): 'website' | 'whatsapp' => {
   return 'website'; // Default for all others
 };
 
-// Helper function to map CSAT
+// Helper to extract main_intent from conversation_intent (stores JSON like {"main_intent": "x", "needs_human": false})
+const parseConversationIntent = (conversationIntent: string | null | undefined): string | null => {
+  const parsed = parseConversationIntentFull(conversationIntent);
+  return parsed.mainIntent;
+};
+
+// Extract both main_intent and needs_human from conversation_intent JSON
+const parseConversationIntentFull = (conversationIntent: string | null | undefined): { mainIntent: string | null; needsHuman: boolean | null } => {
+  if (!conversationIntent || !conversationIntent.trim()) return { mainIntent: null, needsHuman: null };
+  const s = conversationIntent.trim();
+  if (!s.startsWith('{')) return { mainIntent: s, needsHuman: null };
+  try {
+    const parsed = JSON.parse(s);
+    const main = parsed?.main_intent;
+    const mainIntent = (typeof main === 'string' && main.trim()) ? main.trim() : null;
+    let needsHuman: boolean | null = null;
+    if (typeof parsed?.needs_human === 'boolean') {
+      needsHuman = parsed.needs_human;
+    } else if (parsed?.needs_human === 'true' || parsed?.needs_human === true) {
+      needsHuman = true;
+    } else if (parsed?.needs_human === 'false' || parsed?.needs_human === false) {
+      needsHuman = false;
+    }
+    return { mainIntent, needsHuman };
+  } catch {
+    return { mainIntent: null, needsHuman: null };
+  }
+};
+
+// Helper function to map CSAT (numeric customer_satisfaction score from conversation_evaluation)
 const mapCSAT = (evaluation: any): 'good' | 'bad' | null => {
   const satisfaction = evaluation?.customer_satisfaction;
   if (!satisfaction) return null;
@@ -18,6 +48,18 @@ const mapCSAT = (evaluation: any): 'good' | 'bad' | null => {
   if (score >= 4) return 'good';
   if (score <= 2) return 'bad';
   return null; // 3 is neutral
+};
+
+// Helper function to map Student CSAT from meta.feedback.value
+const mapStudentCSAT = (meta: any): StudentCSAT => {
+  try {
+    const value = meta?.feedback?.value;
+    if (value === true || value === 'true') return 'positive';
+    if (value === false || value === 'false') return 'negative';
+    return 'no_feedback';
+  } catch {
+    return 'no_feedback';
+  }
 };
 
 // URL bases for external links (SalesIQ, CRM lead, Zoho Desk)
@@ -32,6 +74,100 @@ function buildLinkUrls(row: { salesiq_conversation_id?: string | null; lead_id?:
     zohoDeskTicketUrl: row.zoho_ticket_id ? `${ZOHO_DESK_BASE}/${row.zoho_ticket_id}` : null,
   };
 }
+
+// Helper to normalize message-level intent which may be stored as plain text or JSON
+const parseMessageIntent = (intent: any): string | string[] | null => {
+  if (intent === null || intent === undefined) return null;
+
+  // If it's already an array, stringify elements and return
+  if (Array.isArray(intent)) {
+    const values = intent
+      .map((v) => (typeof v === 'string' ? v.trim() : String(v)))
+      .filter((v) => v);
+    return values.length ? values : null;
+  }
+
+  let raw = intent;
+  if (typeof raw !== 'string') {
+    try {
+      raw = JSON.stringify(raw);
+    } catch {
+      return null;
+    }
+  }
+
+  const s = raw.trim();
+  if (!s) return null;
+
+  // If it looks like JSON, try to parse
+  if (s.startsWith('{') || s.startsWith('[')) {
+    try {
+      const parsed = JSON.parse(s);
+      if (Array.isArray(parsed)) {
+        const values = parsed
+          .map((v) => (typeof v === 'string' ? v.trim() : String(v)))
+          .filter((v) => v);
+        return values.length ? values : null;
+      }
+      // For objects, fall back to stringified form
+      return JSON.stringify(parsed);
+    } catch {
+      // If JSON parsing fails, just return the raw string
+      return s;
+    }
+  }
+
+  // Plain string intent
+  return s;
+};
+
+// Helper to flatten sub_intent JSON into a human-readable string
+const parseSubIntent = (subIntent: any): string | null => {
+  if (subIntent === null || subIntent === undefined) return null;
+
+  let raw = subIntent;
+  if (typeof raw !== 'string') {
+    try {
+      raw = JSON.stringify(raw);
+    } catch {
+      return null;
+    }
+  }
+
+  const s = raw.trim();
+  if (!s) return null;
+
+  // If it does not look like JSON, return as-is
+  if (!(s.startsWith('{') || s.startsWith('['))) {
+    return s;
+  }
+
+  try {
+    const parsed = JSON.parse(s);
+    const parts: string[] = [];
+
+    const walk = (value: any, prefix: string = '') => {
+      if (value && typeof value === 'object' && !Array.isArray(value)) {
+        for (const [key, v] of Object.entries(value)) {
+          const nextPrefix = prefix ? `${prefix}.${key}` : key;
+          if (v !== null && typeof v === 'object') {
+            walk(v, nextPrefix);
+          } else if (v !== undefined && String(v).trim() !== '') {
+            parts.push(`${nextPrefix}=${String(v)}`);
+          }
+        }
+      } else if (value !== undefined && value !== null) {
+        parts.push(String(value));
+      }
+    };
+
+    walk(parsed);
+    return parts.length ? parts.join('; ') : null;
+  } catch {
+    // Fallback to the raw string if JSON parsing fails
+    return s;
+  }
+};
 
 // Simple in-memory cache for total count
 let totalCountCache: { count: number; timestamp: number; filters: string } | null = null;
@@ -77,6 +213,26 @@ export const conversationRepository = {
       }
     }
 
+    // Student CSAT filter - derived from whatsapp_conversations.meta.feedback.value
+    if (filters.studentCsat && filters.studentCsat.length > 0) {
+      const studentConditions: string[] = [];
+      const selected = filters.studentCsat as StudentCSAT[];
+
+      if (selected.includes('positive')) {
+        studentConditions.push(`JSON_EXTRACT_PATH_TEXT(wc.meta, 'feedback', 'value') = 'true'`);
+      }
+      if (selected.includes('negative')) {
+        studentConditions.push(`JSON_EXTRACT_PATH_TEXT(wc.meta, 'feedback', 'value') = 'false'`);
+      }
+      if (selected.includes('no_feedback')) {
+        studentConditions.push(`JSON_EXTRACT_PATH_TEXT(wc.meta, 'feedback', 'value') IS NULL`);
+      }
+
+      if (studentConditions.length > 0) {
+        whereConditions.push(`(${studentConditions.join(' OR ')})`);
+      }
+    }
+
     // Date range filters - filter by created_at
     if (filters.dateFrom) {
       whereConditions.push(`wc.created_at::date >= $${paramIndex}`);
@@ -105,14 +261,18 @@ export const conversationRepository = {
       }
     }
 
-    // Intent filter - from meta or conversation_evaluation
+    // Conversation intent filter - conversation_intent is JSON, extract main_intent for comparison
     if (filters.intent && filters.intent.length > 0) {
-      whereConditions.push(`(
-        JSON_EXTRACT_PATH_TEXT(wc.meta, 'main_intent') IN (${filters.intent.map((_, i) => `$${paramIndex + i}`).join(', ')})
-        OR JSON_EXTRACT_PATH_TEXT(wc.conversation_evaluation, 'main_intent') IN (${filters.intent.map((_, i) => `$${paramIndex + filters.intent!.length + i}`).join(', ')})
-      )`);
-      params.push(...filters.intent, ...filters.intent);
-      paramIndex += filters.intent.length * 2;
+      whereConditions.push(`JSON_EXTRACT_PATH_TEXT(wc.conversation_intent, 'main_intent') IN (${filters.intent.map((_, i) => `$${paramIndex + i}`).join(', ')})`);
+      params.push(...filters.intent);
+      paramIndex += filters.intent.length;
+    }
+
+    // Needs human filter - from conversation_intent JSON (conversation-level intent classification)
+    if (filters.needsHuman === true) {
+      whereConditions.push(`LOWER(JSON_EXTRACT_PATH_TEXT(wc.conversation_intent, 'needs_human')) = 'true'`);
+    } else if (filters.needsHuman === false) {
+      whereConditions.push(`LOWER(JSON_EXTRACT_PATH_TEXT(wc.conversation_intent, 'needs_human')) = 'false'`);
     }
 
     // Human handover filter - from meta.agent_id presence
@@ -187,6 +347,7 @@ export const conversationRepository = {
         wc.source_details,
         wc.conversation_evaluation,
         wc.meta,
+        wc.conversation_intent,
         wc.automation_enabled,
         wc.phone_number,
         wc.email,
@@ -201,7 +362,7 @@ export const conversationRepository = {
       ${whereClause}
       GROUP BY wc.conversation_id, wc.created_at, wc.last_message_at, 
                wc.source_details, wc.conversation_evaluation, wc.meta,
-               wc.automation_enabled, wc.phone_number, wc.email, wc.user_id,
+               wc.conversation_intent, wc.automation_enabled, wc.phone_number, wc.email, wc.user_id,
                wc.salesiq_conversation_id, wc.lead_id, wc.zoho_ticket_id
       ORDER BY ${orderBy}
       LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
@@ -228,6 +389,8 @@ export const conversationRepository = {
         meta = row.meta ? JSON.parse(row.meta) : {};
       } catch (e) {}
 
+      const intentData = parseConversationIntentFull(row.conversation_intent);
+
       return {
         id: row.conversation_id,
         channel: mapChannel(sourceDetails),
@@ -237,7 +400,8 @@ export const conversationRepository = {
         aiAgentVersion: 'v1.0', // Placeholder
         promptVersion: 'v1.0', // Placeholder
         kbVersion: 'v1.0', // Placeholder
-        detectedIntent: (meta as any).main_intent || (evaluation as any).theme?.main_theme || null,
+        detectedIntent: intentData.mainIntent,
+        needsHuman: intentData.needsHuman,
         outcome: 'ongoing',
         csat: mapCSAT(evaluation),
         humanHandover: !!((meta as any).agent_id),
@@ -248,6 +412,7 @@ export const conversationRepository = {
         messageCount: parseInt(row.message_count) || 0,
         lastMessageTime: row.last_message_at,
         leadCreated: (meta as any).able_to_create_lead === true || (meta as any).able_to_create_lead === 'true',
+        studentCsat: mapStudentCSAT(meta),
         ...buildLinkUrls(row)
       };
     });
@@ -270,6 +435,7 @@ export const conversationRepository = {
         wc.source_details,
         wc.conversation_evaluation,
         wc.meta,
+        wc.conversation_intent,
         wc.automation_enabled,
         wc.phone_number,
         wc.email,
@@ -283,7 +449,7 @@ export const conversationRepository = {
       WHERE wc.conversation_id = $1
       GROUP BY wc.conversation_id, wc.created_at, wc.last_message_at, 
                wc.source_details, wc.conversation_evaluation, wc.meta,
-               wc.automation_enabled, wc.phone_number, wc.email, wc.user_id,
+               wc.conversation_intent, wc.automation_enabled, wc.phone_number, wc.email, wc.user_id,
                wc.salesiq_conversation_id, wc.lead_id, wc.zoho_ticket_id
     `;
 
@@ -312,6 +478,8 @@ export const conversationRepository = {
       meta = row.meta ? JSON.parse(row.meta) : {};
     } catch (e) {}
 
+    const intentData = parseConversationIntentFull(row.conversation_intent);
+
     const conversation: Conversation = {
       id: row.conversation_id,
       channel: mapChannel(sourceDetails),
@@ -321,7 +489,8 @@ export const conversationRepository = {
       aiAgentVersion: 'v1.0', // Placeholder
       promptVersion: 'v1.0', // Placeholder
       kbVersion: 'v1.0', // Placeholder
-      detectedIntent: (meta as any).main_intent || (evaluation as any).theme?.main_theme || null,
+      detectedIntent: intentData.mainIntent,
+      needsHuman: intentData.needsHuman,
       outcome: 'ongoing', // Simplified
       csat: mapCSAT(evaluation),
       humanHandover: !!((meta as any).agent_id),
@@ -332,6 +501,7 @@ export const conversationRepository = {
       messageCount: parseInt(row.message_count) || 0,
       lastMessageTime: row.last_message_at,
       leadCreated: (meta as any).able_to_create_lead === true || (meta as any).able_to_create_lead === 'true',
+      studentCsat: mapStudentCSAT(meta),
       ...buildLinkUrls(row)
     };
 
@@ -348,7 +518,9 @@ export const conversationRepository = {
           from_number,
           to_number,
           status,
-          trace_id
+          trace_id,
+          intent,
+          sub_intent
         FROM whatsapp_messages 
         WHERE conversation_id = $1 
         ORDER BY created_at ASC
@@ -364,7 +536,8 @@ export const conversationRepository = {
         content: msgRow.message_content || '',
         timestamp: msgRow.created_at,
         messageType: msgRow.message_type || 'text',
-        intent: null, // Simplified
+        intent: parseMessageIntent(msgRow.intent),
+        subIntent: parseSubIntent(msgRow.sub_intent),
         processingLatency: null,
         langsmithTraceId: msgRow.trace_id || null,
         promptUsed: null,
@@ -380,7 +553,29 @@ export const conversationRepository = {
   },
 
   async getFilterOptions() {
-    // Return filter options in the format expected by frontend
+    // Fetch Conversation intent options - conversation_intent stores JSON like {"main_intent": "booking_support_comp", "needs_human": false}
+    // Extract distinct main_intent values for the filter dropdown
+    let intentOptions: string[] = [];
+    try {
+      const intentResult = await query(
+        `SELECT DISTINCT JSON_EXTRACT_PATH_TEXT(conversation_intent, 'main_intent') as main_intent
+         FROM whatsapp_conversations
+         WHERE source_details LIKE '%"source": "zoho"%'
+           AND conversation_intent IS NOT NULL
+           AND TRIM(conversation_intent) != ''
+           AND conversation_intent LIKE '{%'
+           AND JSON_EXTRACT_PATH_TEXT(conversation_intent, 'main_intent') IS NOT NULL
+           AND TRIM(JSON_EXTRACT_PATH_TEXT(conversation_intent, 'main_intent')) != ''
+         ORDER BY main_intent`,
+        []
+      );
+      intentOptions = intentResult.rows
+        .map((r: { main_intent: string }) => r.main_intent)
+        .filter(Boolean);
+    } catch (err: any) {
+      logger.warn('Failed to fetch conversation_intent filter options', { error: err?.message });
+    }
+
     return {
       csatOptions: [
         { value: 'good', label: 'Good' },
@@ -388,7 +583,12 @@ export const conversationRepository = {
         { value: 'bad', label: 'Bad' },
         { value: null, label: 'No Rating' }
       ],
-      intentOptions: ['general_inquiry', 'support', 'sales', 'billing'],
+      studentCsatOptions: [
+        { value: 'positive', label: 'Student Positive' },
+        { value: 'negative', label: 'Student Negative' },
+        { value: 'no_feedback', label: 'No Student Feedback' }
+      ],
+      intentOptions,
       channelOptions: [
         { value: 'website', label: 'Website' },
         { value: 'whatsapp', label: 'WhatsApp' }

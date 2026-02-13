@@ -16,6 +16,12 @@ export const QuickFilterChips = ({ filters, onFiltersChange }: QuickFilterChipsP
       case 'needs_review':
         newFilters = { ...newFilters, csat: ['bad'] };
         break;
+      case 'needs_human_yes':
+        newFilters = { ...newFilters, needsHuman: true };
+        break;
+      case 'needs_human_no':
+        newFilters = { ...newFilters, needsHuman: false };
+        break;
       case 'clear':
         newFilters = {};
         break;
@@ -32,6 +38,10 @@ export const QuickFilterChips = ({ filters, onFiltersChange }: QuickFilterChipsP
         return filters.csat?.includes(null) && (!filters.csat || filters.csat.length === 1);
       case 'needs_review':
         return filters.csat?.includes('bad') && (!filters.csat || filters.csat.length === 1);
+      case 'needs_human_yes':
+        return filters.needsHuman === true;
+      case 'needs_human_no':
+        return filters.needsHuman === false;
       default:
         return false;
     }
@@ -49,6 +59,18 @@ export const QuickFilterChips = ({ filters, onFiltersChange }: QuickFilterChipsP
       label: 'Needs Review',
       icon: '⚠️',
       description: 'Bad rating',
+    },
+    {
+      id: 'needs_human_yes',
+      label: 'Needs Human',
+      icon: '👤',
+      description: 'Intent flagged as needs human',
+    },
+    {
+      id: 'needs_human_no',
+      label: 'No Human Needed',
+      icon: '🤖',
+      description: 'Intent flagged as no human needed',
     },
   ];
 

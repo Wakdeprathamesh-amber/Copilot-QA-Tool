@@ -376,19 +376,19 @@ export const QAToolsPanel = ({ conversation }: QAToolsPanelProps) => {
             <dd className="text-gray-900 font-medium">{conversation.participantCount}</dd>
           </div>
           <div className="flex justify-between">
-            <dt className="text-gray-500">Detected Intent:</dt>
+            <dt className="text-gray-500">Conversation intent:</dt>
             <dd className="text-gray-900 font-medium">{conversation.detectedIntent || 'None'}</dd>
           </div>
+          {conversation.needsHuman !== undefined && conversation.needsHuman !== null && (
+            <div className="flex justify-between">
+              <dt className="text-gray-500">Needs human:</dt>
+              <dd className="text-gray-900 font-medium">{conversation.needsHuman ? 'Yes' : 'No'}</dd>
+            </div>
+          )}
           <div className="flex justify-between">
             <dt className="text-gray-500">Channel:</dt>
             <dd className="text-gray-900 font-medium capitalize">{conversation.channel}</dd>
           </div>
-          {conversation.detectedIntent && (
-            <div className="flex justify-between">
-              <dt className="text-gray-500">Detected Intent:</dt>
-              <dd className="text-gray-900 font-medium">{conversation.detectedIntent}</dd>
-            </div>
-          )}
           <div className="flex justify-between">
             <dt className="text-gray-500">Outcome:</dt>
             <dd className="text-gray-900 font-medium capitalize">{conversation.outcome}</dd>

@@ -40,6 +40,8 @@ export interface Conversation {
   endTime: string | null;
   participantCount: number;
   detectedIntent: string | null;
+  /** From conversation_intent JSON - whether intent classification flagged needs_human */
+  needsHuman?: boolean | null;
   outcome: 'qualified' | 'dropped' | 'escalated' | 'ongoing';
   csat: 'good' | 'bad' | null;
   humanHandover: boolean;
@@ -50,6 +52,8 @@ export interface Conversation {
   messageCount?: number;
   lastMessageTime?: string | null;
   leadCreated?: boolean | null; // Extracted from meta.able_to_create_lead
+  /** Student CSAT derived from whatsapp_conversations.meta.feedback.value */
+  studentCsat?: 'positive' | 'negative' | 'no_feedback';
   /** SalesIQ conversation URL */
   salesiqConversationUrl?: string | null;
   /** CRM lead URL (Amber dashboard) */
@@ -76,7 +80,9 @@ export interface Message {
   content: string;
   timestamp: string;
   messageType: 'text' | 'image' | 'file' | 'system';
-  intent: string | null; // Message-level intent
+  intent: string | string[] | null; // Message-level intent (may be a single value or list)
+  /** Flattened, human-readable representation of message-level sub_intent JSON */
+  subIntent?: string | null;
   processingLatency: number | null;
   langsmithTraceId: string | null;
   promptUsed: string | null;
@@ -95,7 +101,11 @@ export interface ConversationFilters {
   dateTo?: string;
   humanHandover?: boolean;
   leadCreated?: boolean | null;
+  /** From conversation_intent.needs_human - filter by intent-level needs human flag */
+  needsHuman?: boolean;
   search?: string;
+  /** Student CSAT filter derived from meta.feedback.value */
+  studentCsat?: ('positive' | 'negative' | 'no_feedback')[];
 }
 
 export interface ConversationListResponse {
@@ -112,6 +122,7 @@ export interface FilterOptions {
   intentOptions: string[];
   channelOptions: Array<{ value: string; label: string }>;
   leadCreatedOptions?: Array<{ value: boolean | null; label: string }>;
+  studentCsatOptions?: Array<{ value: 'positive' | 'negative' | 'no_feedback'; label: string }>;
 }
 
 export interface AuthUser {
@@ -168,6 +179,12 @@ export const api = {
         } else {
           params.append('leadCreated', filters.leadCreated.toString());
         }
+      }
+      if (filters.needsHuman !== undefined) {
+        params.append('needsHuman', filters.needsHuman.toString());
+      }
+      if (filters.studentCsat) {
+        filters.studentCsat.forEach(s => params.append('studentCsat', s));
       }
       
       params.append('page', page.toString());
