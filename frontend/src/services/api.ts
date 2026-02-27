@@ -223,6 +223,10 @@ export const api = {
       const response = await apiClient.get('/qa-assessments/tags');
       return response.data;
     },
+
+    deleteTag: async (tag: string) => {
+      await apiClient.delete('/qa-assessments/tags', { data: { tag } });
+    },
     
     getBulk: async (conversationIds: string[]) => {
       const response = await apiClient.post('/qa-assessments/bulk', { conversationIds });

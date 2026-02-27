@@ -14,6 +14,7 @@ export const QAToolsPanel = ({ conversation }: QAToolsPanelProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [showTagDropdown, setShowTagDropdown] = useState(false);
+  const [deletingTag, setDeletingTag] = useState<string | null>(null);
   const tagInputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -98,7 +99,7 @@ export const QAToolsPanel = ({ conversation }: QAToolsPanelProps) => {
         setSaveStatus('saved');
         queryClient.invalidateQueries(['conversation', conversation.id]);
         queryClient.invalidateQueries(['qaAssessments']);
-        setTags([...tags, tag]);
+        setTags((prev) => [...prev, tag]);
         setNewTag('');
         setShowTagDropdown(false);
         // Refresh available tags to include the new one
@@ -113,8 +114,27 @@ export const QAToolsPanel = ({ conversation }: QAToolsPanelProps) => {
     {
       onSuccess: (_, tagToRemove) => {
         queryClient.invalidateQueries(['conversation', conversation.id]);
-        setTags(tags.filter(t => t !== tagToRemove));
+        setTags((prev) => prev.filter(t => t !== tagToRemove));
       },
+    }
+  );
+
+  const deleteTagMutation = useMutation(
+    (tagToDelete: string) => api.qaAssessments.deleteTag(tagToDelete),
+    {
+      onMutate: (tagToDelete) => {
+        setSaveStatus('saving');
+        setDeletingTag(tagToDelete);
+      },
+      onSuccess: (_, tagToDelete) => {
+        setSaveStatus('saved');
+        queryClient.invalidateQueries(['conversation', conversation.id]);
+        queryClient.invalidateQueries(['qaAssessments']);
+        setTags((prev) => prev.filter(t => t !== tagToDelete));
+        refetchAvailableTags();
+      },
+      onError: () => setSaveStatus('error'),
+      onSettled: () => setDeletingTag(null),
     }
   );
 
@@ -133,6 +153,14 @@ export const QAToolsPanel = ({ conversation }: QAToolsPanelProps) => {
   const handleRemoveTag = (tag: string) => {
     removeTagMutation.mutate(tag);
   };
+
+  const handleDeleteAvailableTag = (tag: string) => {
+    const confirmed = window.confirm(`Delete tag "${tag}" from all conversations?`);
+    if (!confirmed) return;
+    deleteTagMutation.mutate(tag);
+  };
+
+  const isDeletingTag = deleteTagMutation.isLoading;
 
   // Filter available tags based on input
   const filteredTags = newTag.trim()
@@ -263,6 +291,7 @@ export const QAToolsPanel = ({ conversation }: QAToolsPanelProps) => {
                 }}
                 onFocus={() => setShowTagDropdown(true)}
                 onKeyDown={(e) => {
+                  if (isDeletingTag) return;
                   if (e.key === 'Enter') {
                     e.preventDefault();
                     if (isNewTag) {
@@ -274,8 +303,9 @@ export const QAToolsPanel = ({ conversation }: QAToolsPanelProps) => {
                     setShowTagDropdown(false);
                   }
                 }}
+                disabled={isDeletingTag}
                 placeholder="Type to search or add a tag..."
-                className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm disabled:opacity-60 disabled:cursor-not-allowed"
               />
               
               {/* Dropdown */}
@@ -286,14 +316,37 @@ export const QAToolsPanel = ({ conversation }: QAToolsPanelProps) => {
                 >
                   {/* Existing tags */}
                   {filteredTags.map((tag) => (
-                    <button
+                    <div
                       key={tag}
-                      type="button"
-                      onClick={() => handleAddTag(tag)}
-                      className="w-full text-left px-4 py-2 text-sm hover:bg-blue-50 focus:bg-blue-50 focus:outline-none"
+                      className="flex items-center gap-2"
                     >
-                      {tag}
-                    </button>
+                      <button
+                        type="button"
+                        onClick={() => handleAddTag(tag)}
+                        disabled={isDeletingTag}
+                        className="flex-1 text-left px-4 py-2 text-sm hover:bg-blue-50 focus:bg-blue-50 focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
+                      >
+                        {tag}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleDeleteAvailableTag(tag);
+                        }}
+                        disabled={isDeletingTag}
+                        className="px-3 py-2 text-sm text-gray-400 hover:text-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                        aria-label={`Delete tag ${tag}`}
+                        title="Delete tag"
+                      >
+                        {deletingTag === tag ? (
+                          <span className="inline-block h-3 w-3 animate-spin rounded-full border border-current border-t-transparent" />
+                        ) : (
+                          '×'
+                        )}
+                      </button>
+                    </div>
                   ))}
                   
                   {/* Add new tag option */}
@@ -301,7 +354,8 @@ export const QAToolsPanel = ({ conversation }: QAToolsPanelProps) => {
                     <button
                       type="button"
                       onClick={() => handleAddTag()}
-                      className="w-full text-left px-4 py-2 text-sm hover:bg-green-50 focus:bg-green-50 focus:outline-none border-t border-gray-200 text-green-700 font-medium"
+                      disabled={isDeletingTag}
+                      className="w-full text-left px-4 py-2 text-sm hover:bg-green-50 focus:bg-green-50 focus:outline-none border-t border-gray-200 text-green-700 font-medium disabled:opacity-60 disabled:cursor-not-allowed"
                     >
                       + Add new: "{newTag.trim()}"
                     </button>
@@ -311,13 +365,14 @@ export const QAToolsPanel = ({ conversation }: QAToolsPanelProps) => {
             </div>
             <button
               onClick={() => {
+                if (isDeletingTag) return;
                 if (isNewTag) {
                   handleAddTag();
                 } else if (filteredTags.length > 0) {
                   handleAddTag(filteredTags[0]);
                 }
               }}
-              disabled={!newTag.trim() || (!isNewTag && filteredTags.length === 0)}
+              disabled={isDeletingTag || !newTag.trim() || (!isNewTag && filteredTags.length === 0)}
               className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Add

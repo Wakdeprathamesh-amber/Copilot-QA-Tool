@@ -150,6 +150,49 @@ export const qaAssessmentRepository = {
     }
   },
 
+  async deleteTag(tag: string): Promise<number> {
+    try {
+      const tagToRemove = tag.trim();
+      if (!tagToRemove) return 0;
+
+      const result = await query(
+        `SELECT id, tags FROM qa_assessments WHERE tags IS NOT NULL`,
+        []
+      );
+
+      let updatedCount = 0;
+
+      for (const row of result.rows) {
+        const rawTags = row.tags;
+        let tags: string[] = [];
+
+        if (Array.isArray(rawTags)) {
+          tags = rawTags.map((t: any) => String(t).trim()).filter(t => t.length > 0);
+        } else if (typeof rawTags === 'string') {
+          tags = stringToTags(rawTags);
+        }
+
+        if (tags.length === 0) continue;
+
+        const filteredTags = tags.filter(t => t.trim() !== tagToRemove);
+        if (filteredTags.length === tags.length) continue;
+
+        await query(
+          `UPDATE qa_assessments 
+           SET tags = $1, updated_at = CURRENT_TIMESTAMP
+           WHERE id = $2`,
+          [tagsToString(filteredTags), row.id]
+        );
+        updatedCount++;
+      }
+
+      return updatedCount;
+    } catch (error) {
+      logger.error('Error deleting tag globally', { tag, error });
+      throw error;
+    }
+  },
+
   async setNotes(conversationId: string, notes: string): Promise<QAAssessment> {
     try {
       // Get existing assessment

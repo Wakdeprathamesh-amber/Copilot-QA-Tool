@@ -38,6 +38,23 @@ router.get('/tags', async (req: Request, res: Response) => {
   }
 });
 
+// DELETE /api/qa-assessments/tags - Delete a tag globally
+router.delete('/tags', async (req: Request, res: Response) => {
+  try {
+    const { tag } = req.body;
+
+    if (typeof tag !== 'string' || tag.trim() === '') {
+      return res.status(400).json({ error: 'tag must be a non-empty string' });
+    }
+
+    const deletedCount = await qaAssessmentRepository.deleteTag(tag);
+    res.json({ success: true, deletedCount });
+  } catch (error) {
+    logger.error('Error deleting tag globally', { tag: req.body?.tag, error });
+    res.status(500).json({ error: 'Failed to delete tag' });
+  }
+});
+
 // GET /api/qa-assessments/:conversationId - Get QA assessment
 router.get('/:conversationId', async (req: Request, res: Response) => {
   try {
