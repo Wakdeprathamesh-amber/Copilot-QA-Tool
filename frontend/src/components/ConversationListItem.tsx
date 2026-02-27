@@ -47,7 +47,8 @@ export const ConversationListItem = ({ conversation, qaAssessment, onClick, onRa
 
   const handleOpenNewTab = (e: React.MouseEvent) => {
     e.stopPropagation();
-    window.open(`/conversations/${conversation.id}`, '_blank');
+    const link = `${window.location.origin}/conversations/${conversation.id}`;
+    window.open(link, '_blank');
   };
 
   const handleQuickRating = async (e: React.MouseEvent, rating: 'good' | 'okay' | 'bad') => {

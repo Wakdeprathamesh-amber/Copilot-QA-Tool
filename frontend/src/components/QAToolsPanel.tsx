@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useMutation, useQueryClient, useQuery } from 'react-query';
+import { useMutation, useQueryClient } from 'react-query';
 import { api, Conversation } from '../services/api';
 
 interface QAToolsPanelProps {
@@ -14,25 +14,39 @@ export const QAToolsPanel = ({ conversation }: QAToolsPanelProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [showTagDropdown, setShowTagDropdown] = useState(false);
-  const [deletingTag, setDeletingTag] = useState<string | null>(null);
   const tagInputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const queryClient = useQueryClient();
 
-  // Fetch available tags
-  const { data: availableTagsData, refetch: refetchAvailableTags } = useQuery(
-    ['availableTags'],
-    async () => {
-      const response = await api.qaAssessments.getAllTags();
-      return response.data || [];
-    },
-    {
-      staleTime: 30000, // Cache for 30 seconds
-    }
-  );
-
-  const availableTags = availableTagsData || [];
+  const availableTags = [
+    'Small Talk Handling Failure',
+    'Intent Not Detected (Small Talk Context)',
+    'Missing Information',
+    'Incorrect Summary Generation',
+    'Intent Misclassification',
+    'Intent Not Detected',
+    'Handover Failure - Not Triggered',
+    'Incorrect Handover Trigger',
+    'Entity Extraction Failure - Property',
+    'Entity Extraction Failure - Location/Region',
+    'Entity Extraction Error - Preferences',
+    'Knowledge Gap - Property Information',
+    'Incorrect Property Information',
+    'Room Type Recognition Failure',
+    'No Recommendation Generated',
+    'Irrelevant or Incorrect Recommendation',
+    'Recommendation Flow Breakdown',
+    'Viewing Flow Breakdown',
+    'Date/Time Extraction Error',
+    'No Response (System Failure)',
+    'Response Formatting Issue',
+    'Verbose or Vague Response',
+    'High Latency / Delayed Response',
+    'Human Did Not Join',
+    'Empty or Null Response',
+    'others',
+  ];
 
   // Auto-hide save status after 2 seconds
   useEffect(() => {
@@ -102,8 +116,6 @@ export const QAToolsPanel = ({ conversation }: QAToolsPanelProps) => {
         setTags((prev) => [...prev, tag]);
         setNewTag('');
         setShowTagDropdown(false);
-        // Refresh available tags to include the new one
-        refetchAvailableTags();
       },
       onError: () => setSaveStatus('error'),
     }
@@ -116,25 +128,6 @@ export const QAToolsPanel = ({ conversation }: QAToolsPanelProps) => {
         queryClient.invalidateQueries(['conversation', conversation.id]);
         setTags((prev) => prev.filter(t => t !== tagToRemove));
       },
-    }
-  );
-
-  const deleteTagMutation = useMutation(
-    (tagToDelete: string) => api.qaAssessments.deleteTag(tagToDelete),
-    {
-      onMutate: (tagToDelete) => {
-        setSaveStatus('saving');
-        setDeletingTag(tagToDelete);
-      },
-      onSuccess: (_, tagToDelete) => {
-        setSaveStatus('saved');
-        queryClient.invalidateQueries(['conversation', conversation.id]);
-        queryClient.invalidateQueries(['qaAssessments']);
-        setTags((prev) => prev.filter(t => t !== tagToDelete));
-        refetchAvailableTags();
-      },
-      onError: () => setSaveStatus('error'),
-      onSettled: () => setDeletingTag(null),
     }
   );
 
@@ -154,24 +147,12 @@ export const QAToolsPanel = ({ conversation }: QAToolsPanelProps) => {
     removeTagMutation.mutate(tag);
   };
 
-  const handleDeleteAvailableTag = (tag: string) => {
-    const confirmed = window.confirm(`Delete tag "${tag}" from all conversations?`);
-    if (!confirmed) return;
-    deleteTagMutation.mutate(tag);
-  };
-
-  const isDeletingTag = deleteTagMutation.isLoading;
-
   // Filter available tags based on input
   const filteredTags = newTag.trim()
-    ? availableTags.filter(tag => 
+    ? availableTags.filter(tag =>
         tag.toLowerCase().includes(newTag.toLowerCase()) && !tags.includes(tag)
       )
     : availableTags.filter(tag => !tags.includes(tag));
-
-  const isNewTag = newTag.trim() && 
-    !availableTags.some(tag => tag.toLowerCase() === newTag.trim().toLowerCase()) &&
-    !tags.includes(newTag.trim());
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -291,88 +272,46 @@ export const QAToolsPanel = ({ conversation }: QAToolsPanelProps) => {
                 }}
                 onFocus={() => setShowTagDropdown(true)}
                 onKeyDown={(e) => {
-                  if (isDeletingTag) return;
                   if (e.key === 'Enter') {
                     e.preventDefault();
-                    if (isNewTag) {
-                      handleAddTag();
-                    } else if (filteredTags.length > 0) {
+                    if (filteredTags.length > 0) {
                       handleAddTag(filteredTags[0]);
                     }
                   } else if (e.key === 'Escape') {
                     setShowTagDropdown(false);
                   }
                 }}
-                disabled={isDeletingTag}
-                placeholder="Type to search or add a tag..."
+                placeholder="Type to search tags..."
                 className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm disabled:opacity-60 disabled:cursor-not-allowed"
               />
               
               {/* Dropdown */}
-              {showTagDropdown && (filteredTags.length > 0 || isNewTag) && (
+              {showTagDropdown && filteredTags.length > 0 && (
                 <div
                   ref={dropdownRef}
                   className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto"
                 >
                   {/* Existing tags */}
                   {filteredTags.map((tag) => (
-                    <div
-                      key={tag}
-                      className="flex items-center gap-2"
-                    >
-                      <button
-                        type="button"
-                        onClick={() => handleAddTag(tag)}
-                        disabled={isDeletingTag}
-                        className="flex-1 text-left px-4 py-2 text-sm hover:bg-blue-50 focus:bg-blue-50 focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
-                      >
-                        {tag}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          handleDeleteAvailableTag(tag);
-                        }}
-                        disabled={isDeletingTag}
-                        className="px-3 py-2 text-sm text-gray-400 hover:text-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                        aria-label={`Delete tag ${tag}`}
-                        title="Delete tag"
-                      >
-                        {deletingTag === tag ? (
-                          <span className="inline-block h-3 w-3 animate-spin rounded-full border border-current border-t-transparent" />
-                        ) : (
-                          '×'
-                        )}
-                      </button>
-                    </div>
-                  ))}
-                  
-                  {/* Add new tag option */}
-                  {isNewTag && (
                     <button
+                      key={tag}
                       type="button"
-                      onClick={() => handleAddTag()}
-                      disabled={isDeletingTag}
-                      className="w-full text-left px-4 py-2 text-sm hover:bg-green-50 focus:bg-green-50 focus:outline-none border-t border-gray-200 text-green-700 font-medium disabled:opacity-60 disabled:cursor-not-allowed"
+                      onClick={() => handleAddTag(tag)}
+                      className="w-full text-left px-4 py-2 text-sm hover:bg-blue-50 focus:bg-blue-50 focus:outline-none"
                     >
-                      + Add new: "{newTag.trim()}"
+                      {tag}
                     </button>
-                  )}
+                  ))}
                 </div>
               )}
             </div>
             <button
               onClick={() => {
-                if (isDeletingTag) return;
-                if (isNewTag) {
-                  handleAddTag();
-                } else if (filteredTags.length > 0) {
+                if (filteredTags.length > 0) {
                   handleAddTag(filteredTags[0]);
                 }
               }}
-              disabled={isDeletingTag || !newTag.trim() || (!isNewTag && filteredTags.length === 0)}
+              disabled={!newTag.trim() || filteredTags.length === 0}
               className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Add
